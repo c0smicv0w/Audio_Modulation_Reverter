@@ -4,7 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.cpp \
-    Transform.cpp
+    Transform.cpp \
+    ParseParameter.cpp
 
 HEADERS += \
     amr.h \

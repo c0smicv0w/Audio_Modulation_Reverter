@@ -4,9 +4,9 @@
 class ParseParameter
 {
 private:
-    char *inFileName;
-    char *outFileName;
-    double pitch;
+    char *inFileName = NULL;
+    char *outFileName = NULL;
+    double pitch = 0.0;
 
 public:
     char *getInFileName() const;
@@ -15,6 +15,12 @@ public:
     void setOutFileName(char *value);
     double getPitch() const;
     void setPitch(double value);
+
+    ParseParameter(const int argc, const char* const argv[]);
+
+    void parseSwitchParam(const string &str);
+    double parseOption(const string &str) const;
+    void checkLimits();
 };
 
 #endif // PARSEPARAMETER_H
