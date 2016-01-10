@@ -8,5 +8,6 @@ SOURCES += main.cpp \
 
 HEADERS += \
     amr.h \
-    Transform.h
+    Transform.h \
+    ParseParameter.h
 
