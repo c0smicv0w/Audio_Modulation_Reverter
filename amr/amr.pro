@@ -5,11 +5,12 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     Transform.cpp \
-    ParseParameter.cpp
+    ParseParameter.cpp \
+    WaveFile.cpp
 
 HEADERS += \
     amr.h \
     Transform.h \
     ParseParameter.h \
-    wavefile.h
+    WaveFile.h
 
