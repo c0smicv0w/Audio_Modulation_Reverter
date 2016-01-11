@@ -10,5 +10,6 @@ SOURCES += main.cpp \
 HEADERS += \
     amr.h \
     Transform.h \
-    ParseParameter.h
+    ParseParameter.h \
+    wavefile.h
 
