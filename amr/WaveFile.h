@@ -92,8 +92,9 @@ public:
     uint getLengthMS() const;
     uint getElapsedMs() const;
 
-    int read(unsigned char *buffer, int macElems);
+    int read(unsigned char *buffer, int maxElems);
     int read(short *buffer, int maxElems);
+    int read(double *buffer, int maxElems);
 
     int eof() const;
 };
