@@ -13,4 +13,3 @@ HEADERS += \
     Transform.h \
     ParseParameter.h \
     WaveFile.h
-

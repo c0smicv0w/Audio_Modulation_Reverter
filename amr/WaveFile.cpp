@@ -566,6 +566,11 @@ void WavOutFile::fillInHeader(const uint sampleRate, const uint bits, const uint
     header.format.samplerate = (int)sampleRate;
 
     // fill in the 'fact' part
+    memcpy(&(header.fact.fact_field), factStr, 4);
+    header.fact.fact_len = 4;
+    header.fact.fact_sample_len = 0;
+
+    // fill in the 'data' part
 
     // copy string 'data' to data_field
     memcpy(&(header.data.data_field), dataStr, 4);
