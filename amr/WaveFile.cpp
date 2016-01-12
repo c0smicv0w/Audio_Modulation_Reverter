@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <cstring>
 #include <ctype.h>
+#include <stdexcept>
 
 #include "WaveFile.h"
 
@@ -569,8 +570,275 @@ uint WavInFile::getLengthMS() const
 }
 
 
-// Returns how many milliseconds of audio have so far been read from the file
+// Returns how milliseconds of audio have proceeded
 uint WavInFile::getElapsedMS() const
 {
     return (uint)(1000.0 * (double)dataRead / (double)header.format.byte_rate);
 }
+
+
+
+// Class WavOutFile
+WavOutFile::WaveOutFile(const char *filename, int sampleRate, int bits, int channels)
+{
+    bytesWritten = 0;
+    fp = fopen(filename, "wb");
+
+    if (fp == NULL)
+    {
+        std::runtime_error("Unable to open file for writng");
+    }
+
+    fillInHeader(sampleRate, bits, channels);
+    writeHeader();
+}
+
+WavOutFile::WaveOutFile(File *file, int sampleRate, int bits, int channels)
+{
+    bytesWritten = 0;
+    fp = file;
+
+    if (fp == NULL)
+    {
+        std::runtime_error("Error: Unable to access output file stream");
+    }
+
+    fillInHeader(sampleRate, bits, channels);
+    writeHeader();
+}
+
+WavOutFile::~WaveOutFile()
+{
+    finishHeader();
+    if (fp)
+        fclose(fp);
+    fp = NULL;
+}
+
+void WavOutFile::fillInHeader(const uint sampleRate, const uint bits, const uint channels)
+{
+    // fill in the 'riff' part
+
+    // copy string 'RIFF' to riff_char
+    memcpy(&(header.riff.riff_char), riffStr, 4);
+    // package_len unknown
+    header.riff.package_len = 0;
+    // copy string 'WAVE' to wave
+    memcpy(&(header.riff.wave), waveStr, 4);
+
+    // fill in the 'format' part
+
+    // copy string 'fmt ' to format
+    memcpy(&(header.format.format), fmtStr, 4);
+
+    header.format.format_len = 0x10;
+    header.format.fixed = 1;
+    header.format.channel = (short)channels;
+    header.format.samplerate = (int)sampleRate;
+    header.format.bits_per_sample = (short)bits;
+    header.format.byte_per_sample = (short)(bits * channels / 8);
+    header.format.byterate = header.format.byte_per_sample * (int)sampleRate;
+    header.format.samplerate = (int)sampleRate;
+
+    // fill in the 'fact' part
+
+    // copy string 'data' to data_field
+    memcpy(&(header.data.data_field), dataStr, 4);
+    header.data.data_len = 0;
+}
+
+void WavOutFile::finishHeader()
+{
+    header.riff.package_len = bytesWritten + sizeof(WavHeader) -  sizeof(WavRiff) + 4;
+    header.data.data_len = bytesWritten;
+    header.fact.fact_sample_len = bytesWritten / header.format.byte_per_sample;
+
+    writeHeader();
+}
+
+void WavOutFile::writeHeader()
+{
+    WavHeader hdrTmp;
+    int res;
+
+    // swap order if necessary
+    hdrTmp = header;
+    _swap32((int &)hdrTmp.riff.package_len);
+    _swap32((int &)hdrTmp.format.format_len);
+    _swap32((short &)hdrTmp.format.fixed);
+    _swap32((short &)hdrTmp.format.channel);
+    _swap32((int &)hdrTmp.format.samplerate);
+    _swap32((int &)hdrTmp.format.byterate);
+    _swap32((short &)hdrTmp.format.byte_per_sample);
+    _swap32((short &)hdrTmp.format.bits_per_sample);
+    _swap32((int &)hdrTmp.data.data_len);
+    _swap32((int &)hdrTmp.fact.fact_len);
+    _swap32((int &)hdrTmp.fact.fact_sample_len);
+
+    // write the supplemented header in the beginning of the file
+    fseek(fp, 0, SEEK_SET);
+    res = (int)fwrite(&hdrTmp, sizeof(hdrTmp), 1, fp);
+    if (res != 1)
+    {
+        std::runtime_error("Error while writing to a wav file");
+    }
+
+    fseek(fp, 0, SEEK_END);
+
+}
+
+
+void WavOutFile::write(const unsigned char *buffer, int numElems)
+{
+    int res;
+
+    if (header.format.bits_per_sample != 0)
+    {
+        std::runtime_error("Error: WavOutFile::write(const char*, int) accepts ont 8bit samples");
+    }
+    assert(sizeof(char) == 1);
+
+    res = (int)fwrite(buffer, 1, numElems, fp);
+    if (res != numElems)
+    {
+        std::runtime_error("Error while writng to a wav file");
+    }
+
+    bytesWritten += numElems;
+}
+
+void WavOutFile::write(const double *buffer, int numElems)
+{
+    int res;
+
+    // 16 bit sample
+    if (numElems < 1) // nothing to do
+        return;
+
+    switch (header.format.bits_per_sample)
+    {
+    case 8:
+    {
+        int i;
+        unsigned char *temp = (unsigned char *)getConvBuf(numElems);
+        // convert from 16bit format to 8bit format
+        for (i = 0; i < numElems; i++)
+        {
+            temp[i] = (unsigned char)(buffer[i] / 256 + 128);
+        }
+        // write in 8bit format
+        write(temp, numElems);
+        break;
+    }
+    case 16:
+    {
+        // 16 bit format
+
+        //use temp buffer to swap byte order if necssary
+        short *pTemp = (short *)getConvBuf(numElems * sizeof(short));
+        memcpy(pTemp, buffer, numElems * 2);
+        _swap16Buffer(pTemp, numElems);
+
+        res = (int)fwrite(pTemp, 2, numElems, fp);
+
+        if (res != numElems)
+        {
+            std::runtime_error("Error while writing to a wav file.");
+        }
+        byteWritten += 2 * numElems;
+        break;
+    }
+    default:
+    {
+        std::runtime_error("unsupported sample wav file. can't open wave file");
+    }
+    }
+}
+
+// Convert from double to integer and saturate
+inline int saturate(double dvalue, double minval, double maxval)
+{
+    if (dvalue > maxval)
+    {
+        dvalue = maxval;
+    }
+    else if (dvalue < minval)
+    {
+        dvalue = minval;
+    }
+    return (int)dvalue;
+}
+
+void WavOutFile::write(const double *buffer, int numElems)
+{
+    int numBytes;
+    int bytesPerSample;
+
+    if (numElems == 0) return;
+
+    bytesPerSample = header.format.bits_per_sample / 8;
+    numBytes = numElems * bytesPerSample;
+    short *temp = (short*)getConvBuffer(numBytes);
+
+    switch (bytesPerSample)
+    {
+        case 1:
+        {
+            unsigned char *temp2 = (unsigned char *)temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                temp2[i] = (unsigned char)saturate(buffer[i] * 128.0 + 128.0, 0.0, 255.0);
+            }
+            break;
+        }
+
+        case 2:
+        {
+            short *temp2 = (short *)temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                short value = (short)saturate(buffer[i] * 32768.0, -32768.0, 32767.0);
+                temp2[i] = _swap16(value);
+            }
+            break;
+        }
+
+        case 3:
+        {
+            char *temp2 = (char *)temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                int value = saturate(buffer[i] * 8388608.0f, -8388608.0f, 8388607.0f);
+                *((int*)temp2) = _swap32(value);
+                temp2 += 3;
+            }
+            break;
+        }
+
+        case 4:
+        {
+            int *temp2 = (int *)temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                int value = saturate(buffer[i] * 2147483648.0, -2147483648.0, 2147483647.0);
+                temp2[i] = _swap32(value);
+            }
+            break;
+        }
+
+        default:
+            assert(false);
+    }
+
+    int res = (int)fwrite(temp, 1, numBytes, fptr);
+
+    if (res != numBytes)
+    {
+        std::runtime_error("Error while writing to a wav file.");
+    }
+    bytesWritten += numBytes;
+}
+
+
+
+

@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "ParseParameter.h"
 
 using namespace std;
