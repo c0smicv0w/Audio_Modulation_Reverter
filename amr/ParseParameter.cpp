@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <stdlib.h>
 #include "ParseParameter.h"
 
 using namespace std;
@@ -6,8 +7,8 @@ using namespace std;
 // Constructor
 ParseParameter::ParseParameter(const int argc, const char * const argv[])
 {
-    setInFileName((char*)argv[1]);
-    setOutFileName((char*)argv[2]);
+    inFileName = (char*)argv[1];
+    outFileName = (char*)argv[2];
 
 }
 
@@ -36,7 +37,7 @@ void ParseParameter::parseSwitchParam(const string &str)
     {
     case 'p':
         // '-pitch=xx'
-        setPitch(parseOption(str));
+        this->pitch = parseOption(str);
         break;
     default:
         string msg = "ERROR: Illegal parameter";
@@ -63,15 +64,15 @@ void ParseParameter::checkLimits()
 {
     double pitch;
 
-    pitch = getPitch();
+    pitch = this->pitch;
 
     if (pitch < -60.0)
     {
-        setPitch(-60.0);
+        this->pitch = -60.0;
     }
     else if (pitch > 60.0)
     {
-        setPitch(60.0);
+        this->pitch = 60.0;
     }
 
 }

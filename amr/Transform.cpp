@@ -1,12 +1,11 @@
 #include <math.h>
 #include <algorithm>
+#include <string.h>
 #include "Transform.h"
-
-using namespace Transform;
 
 const double PI = 3.14159265358979323846;
 
-Transform::DFT1d(double *re, double *im, int N, int dir)
+void Transform::DFT1d(double *re, double *im, int N, int dir)
 {
     double* tr = new double[N];
     double* ti = new double[N];
@@ -46,7 +45,7 @@ Transform::DFT1d(double *re, double *im, int N, int dir)
     delete[] ti;
 }
 
-Transform::FFT1d(double *re, double *im, int N, int dir)
+void Transform::FFT1d(double *re, double *im, int N, int dir)
 {
     register int i, j, k;
 

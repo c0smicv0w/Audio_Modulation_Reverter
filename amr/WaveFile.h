@@ -1,7 +1,6 @@
 #ifndef WAVEFILE
 #define WAVEFILE
 
-#include <stdio.h>
 
 #ifndef uint
 typedef unsigned int uint;
@@ -55,7 +54,7 @@ private:
 
 protected:
     WavFileGeneric();
-    virtual ~WavFileGeneric();
+    virtual ~WavFileGeneric() = 0;
 
     void *getConvBuf(int sizeByte);
 };
@@ -90,7 +89,7 @@ public:
     uint getBytesPerSample() const;
     uint getNumChannels() const;
     uint getLengthMS() const;
-    uint getElapsedMs() const;
+    uint getElapsedMS() const;
 
     int read(unsigned char *buffer, int maxElems);
     int read(short *buffer, int maxElems);
@@ -111,13 +110,13 @@ private:
     void writeHeader();
 
 public:
-    WaveOutFile(const char *filename, int sampleRate, int bits, int channels);
-    WaveOutFile(File *file, int sampleRate, int bits, int channels);
-    ~WaveOutFile();
+    WavOutFile(const char *filename, int sampleRate, int bits, int channels);
+    WavOutFile(FILE *file, int sampleRate, int bits, int channels);
+    ~WavOutFile();
 
     void write(const unsigned char *buffer, int numElems);
+    void write(const short *buffer, int numElems);
     void write(const double *buffer, int numElems);
-
 };
 
 

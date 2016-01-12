@@ -15,75 +15,17 @@ static const char fmtStr[]  = "fmt";
 static const char factStr[] = "fact";
 static const char dataStr[] = "data";
 
-#ifdef BYTE_ORDER
-#if BYTE_ORDER == BIG_ENDIAN
-#define _BIG_ENDIAN_
-#endif
-#endif
-
-#ifdef _BIG_ENDIAN_
-// big-endian CPU, swap bytes in 16 & 32 bit words
-
-// helper-function to swap byte-order of 32bit integer
-static inline int _swap32(int &dwData)
-{
-    dwData = ((dwData >> 24) & 0x000000FF) |
-            ((dwData >> 8)  & 0x0000FF00) |
-            ((dwData << 8)  & 0x00FF0000) |
-            ((dwData << 24) & 0xFF000000);
-    return dwData;
-}
-
-// helper-function to swap byte-order of 16bit integer
-static inline short _swap16(short &wData)
-{
-    wData = ((wData >> 8) & 0x00FF) |
-            ((wData << 8) & 0xFF00);
-    return wData;
-}
-
-// helper-function to swap byte-order of buffer of 16bit integers
-static inline void _swap16Buffer(short *pData, int numWords)
-{
-    int i;
-
-    for (i = 0; i < numWords; i ++)
-    {
-        pData[i] = _swap16(pData[i]);
-    }
-}
-
-#else   // BIG_ENDIAN
-// little-endian CPU, WAV file is ok as such
-
-// dummy helper-function
-static inline int _swap32(int &dwData)
-{
-    // do nothing
-    return dwData;
-}
-
-// dummy helper-function
-static inline short _swap16(short &wData)
-{
-    // do nothing
-    return wData;
-}
-
-// dummy helper-function
-static inline void _swap16Buffer(short *pData, int numBytes)
-{
-    // do nothing
-}
-
-#endif  // BIG_ENDIAN
-
-
 
 //WavFileGeneric
 WavFileGeneric::WavFileGeneric()
 {
     convBuf = NULL;
+    convBufSize = 0;
+}
+
+WavFileGeneric::~WavFileGeneric()
+{
+    delete[] convBuf;
     convBufSize = 0;
 }
 
@@ -108,8 +50,8 @@ WavInFile::WavInFile(const char *filename)
     if (fp == NULL)
     {
         string msg = "Error: Unalbe to open file \"";
-        msg += fileName;
-        meg += "\" for reading.";
+        msg += filename;
+        msg += "\" for reading.";
         std::runtime_error(msg.c_str());
     }
 
@@ -235,7 +177,6 @@ int WavInFile::read(short *buffer, int maxElems)
         dataRead += numBytes;
         numElems = numBytes / 2;
 
-        _swap16Buffer((short *)buffer, numElems);
         break;
     }
     default:
@@ -270,7 +211,7 @@ int WavInFile::read(double *buffer, int maxElems)
     }
     
     char *temp = (char*)getConvBuf(numBytes);
-    numBytes = (int)fread(temp, 1, numbytes, fp);
+    numBytes = (int)fread(temp, 1, numBytes, fp);
     dataRead += numBytes;
 
     numElems = numBytes / bytesPerSample;
@@ -294,7 +235,7 @@ int WavInFile::read(double *buffer, int maxElems)
         for (int i = 0; i < numElems; i++)
         {
             short value = temp2[i];
-            buffer[i] = (double)(_swap16(value) * conv);
+            buffer[i] = (double)(value * conv);
         }
         break;
     }
@@ -305,7 +246,7 @@ int WavInFile::read(double *buffer, int maxElems)
         for (int i = 0; i < numElems; i++)
         {
             int value = *((int*)temp2);
-            value = _swap32(value) & 0x00ffffff;
+            value = value & 0x00ffffff;
             value |= (value & 0x00800000) ? 0xff000000 : 0;
             buffer[i] = (double)(value * conv);
             temp2 += 3;
@@ -320,7 +261,7 @@ int WavInFile::read(double *buffer, int maxElems)
         for (int i = 0; i < numElems; i++)
         {
             int value = temp2[i];
-            buffer[i] = (double)(_swap32(value) * conv);
+            buffer[i] = (double)(value * conv);
         }
         break;
     }
@@ -331,7 +272,8 @@ int WavInFile::read(double *buffer, int maxElems)
 }
 
 
-int WavInFile::eof()
+
+int WavInFile::eof() const
 {
     return (dataRead == header.data.data_len || feof(fp));
 }
@@ -362,10 +304,7 @@ static int isAlphaStr(const char *str)
 
 int WavInFile::readRIFFBlock()
 {
-    if (fread(&(header.riff), sizeof(WavRiff), 1, fptr) != 1) return -1;
-
-    // swap 32bit data byte order if necessary
-    _swap32((int &)header.riff.package_len);
+    if (fread(&(header.riff), sizeof(WavRiff), 1, fp) != 1) return -1;
 
     // header.riff.riff_char should equal to 'RIFF');
     if (memcmp(riffStr, header.riff.riff_char, 4) != 0) return -1;
@@ -381,7 +320,7 @@ int WavInFile::readHeaderBlock()
     string sLabel;
 
     // Read label string
-    if (fread(label, 1, 4, fptr) !=4)
+    if (fread(label, 1, 4, fp) !=4)
         return -1;
 
     label[4] = 0;
@@ -395,12 +334,11 @@ int WavInFile::readHeaderBlock()
         int nLen, nDump;
 
         // 'fmt ' block
-        memcpy(header.format.fmt, fmtStr, 4);
+        memcpy(header.format.format, fmtStr, 4);
 
         // read length of the format field
-        if (fread(&nLen, sizeof(int), 1, fptr) != 1) return -1;
-        // swap byte order if necessary
-        _swap32(nLen); // int format_len;
+        if (fread(&nLen, sizeof(int), 1, fp) != 1) return -1;
+
         header.format.format_len = nLen;
 
         // calculate how much length differs from expected
@@ -413,20 +351,12 @@ int WavInFile::readHeaderBlock()
         }
 
         // read data
-        if (fread(&(header.format.fixed), nLen, 1, fptr) != 1) return -1;
-
-        // swap byte order if necessary
-        _swap16(header.format.fixed);            // short int fixed;
-        _swap16(header.format.channel_number);   // short int channel_number;
-        _swap32((int &)header.format.sample_rate);      // int sample_rate;
-        _swap32((int &)header.format.byte_rate);        // int byte_rate;
-        _swap16(header.format.byte_per_sample);  // short int byte_per_sample;
-        _swap16(header.format.bits_per_sample);  // short int bits_per_sample;
+        if (fread(&(header.format.fixed), nLen, 1, fp) != 1) return -1;
 
         // if format_len is larger than expected, skip the extra data
         if (nDump > 0)
         {
-            fseek(fptr, nDump, SEEK_CUR);
+            fseek(fp, nDump, SEEK_CUR);
         }
 
         return 0;
@@ -439,9 +369,9 @@ int WavInFile::readHeaderBlock()
         memcpy(header.fact.fact_field, factStr, 4);
 
         // read length of the fact field
-        if (fread(&nLen, sizeof(int), 1, fptr) != 1) return -1;
-        // swap byte order if necessary
-        _swap32(nLen); // int fact_len;
+        if (fread(&nLen, sizeof(int), 1, fp) != 1)
+            return -1;
+
         header.fact.fact_len = nLen;
 
         // calculate how much length differs from expected
@@ -454,15 +384,13 @@ int WavInFile::readHeaderBlock()
         }
 
         // read data
-        if (fread(&(header.fact.fact_sample_len), nLen, 1, fptr) != 1) return -1;
+        if (fread(&(header.fact.fact_sample_len), nLen, 1, fp) != 1) return -1;
 
-        // swap byte order if necessary
-        _swap32((int &)header.fact.fact_sample_len);    // int sample_length;
 
         // if fact_len is larger than expected, skip the extra data
         if (nDump > 0)
         {
-            fseek(fptr, nDump, SEEK_CUR);
+            fseek(fp, nDump, SEEK_CUR);
         }
 
         return 0;
@@ -471,10 +399,7 @@ int WavInFile::readHeaderBlock()
     {
         // 'data' block
         memcpy(header.data.data_field, dataStr, 4);
-        if (fread(&(header.data.data_len), sizeof(uint), 1, fptr) != 1) return -1;
-
-        // swap byte order if necessary
-        _swap32((int &)header.data.data_len);
+        if (fread(&(header.data.data_len), sizeof(uint), 1, fp) != 1) return -1;
 
         return 1;
     }
@@ -485,12 +410,12 @@ int WavInFile::readHeaderBlock()
         // unknown block
 
         // read length
-        if (fread(&len, sizeof(len), 1, fptr) != 1) return -1;
+        if (fread(&len, sizeof(len), 1, fp) != 1) return -1;
         // scan through the block
         for (i = 0; i < len; i ++)
         {
-            if (fread(&temp, 1, 1, fptr) != 1) return -1;
-            if (feof(fptr)) return -1;   // unexpected eof
+            if (fread(&temp, 1, 1, fp) != 1) return -1;
+            if (feof(fp)) return -1;   // unexpected eof
         }
     }
     return 0;
@@ -517,7 +442,7 @@ int WavInFile::readWavHeaders()
 
 uint WavInFile::getNumChannels() const
 {
-    return header.format.channel_number;
+    return header.format.channel;
 }
 
 
@@ -535,7 +460,7 @@ uint WavInFile::getBytesPerSample() const
 
 uint WavInFile::getSampleRate() const
 {
-    return header.format.sample_rate;
+    return header.format.samplerate;
 }
 
 
@@ -573,13 +498,13 @@ uint WavInFile::getLengthMS() const
 // Returns how milliseconds of audio have proceeded
 uint WavInFile::getElapsedMS() const
 {
-    return (uint)(1000.0 * (double)dataRead / (double)header.format.byte_rate);
+    return (uint)(1000.0 * (double)dataRead / (double)header.format.byterate);
 }
 
 
 
 // Class WavOutFile
-WavOutFile::WaveOutFile(const char *filename, int sampleRate, int bits, int channels)
+WavOutFile::WavOutFile(const char *filename, int sampleRate, int bits, int channels)
 {
     bytesWritten = 0;
     fp = fopen(filename, "wb");
@@ -593,7 +518,7 @@ WavOutFile::WaveOutFile(const char *filename, int sampleRate, int bits, int chan
     writeHeader();
 }
 
-WavOutFile::WaveOutFile(File *file, int sampleRate, int bits, int channels)
+WavOutFile::WavOutFile(FILE *file, int sampleRate, int bits, int channels)
 {
     bytesWritten = 0;
     fp = file;
@@ -607,7 +532,7 @@ WavOutFile::WaveOutFile(File *file, int sampleRate, int bits, int channels)
     writeHeader();
 }
 
-WavOutFile::~WaveOutFile()
+WavOutFile::~WavOutFile()
 {
     finishHeader();
     if (fp)
@@ -660,20 +585,7 @@ void WavOutFile::writeHeader()
 {
     WavHeader hdrTmp;
     int res;
-
-    // swap order if necessary
     hdrTmp = header;
-    _swap32((int &)hdrTmp.riff.package_len);
-    _swap32((int &)hdrTmp.format.format_len);
-    _swap32((short &)hdrTmp.format.fixed);
-    _swap32((short &)hdrTmp.format.channel);
-    _swap32((int &)hdrTmp.format.samplerate);
-    _swap32((int &)hdrTmp.format.byterate);
-    _swap32((short &)hdrTmp.format.byte_per_sample);
-    _swap32((short &)hdrTmp.format.bits_per_sample);
-    _swap32((int &)hdrTmp.data.data_len);
-    _swap32((int &)hdrTmp.fact.fact_len);
-    _swap32((int &)hdrTmp.fact.fact_sample_len);
 
     // write the supplemented header in the beginning of the file
     fseek(fp, 0, SEEK_SET);
@@ -707,7 +619,7 @@ void WavOutFile::write(const unsigned char *buffer, int numElems)
     bytesWritten += numElems;
 }
 
-void WavOutFile::write(const double *buffer, int numElems)
+void WavOutFile::write(const short *buffer, int numElems)
 {
     int res;
 
@@ -737,7 +649,6 @@ void WavOutFile::write(const double *buffer, int numElems)
         //use temp buffer to swap byte order if necssary
         short *pTemp = (short *)getConvBuf(numElems * sizeof(short));
         memcpy(pTemp, buffer, numElems * 2);
-        _swap16Buffer(pTemp, numElems);
 
         res = (int)fwrite(pTemp, 2, numElems, fp);
 
@@ -745,7 +656,7 @@ void WavOutFile::write(const double *buffer, int numElems)
         {
             std::runtime_error("Error while writing to a wav file.");
         }
-        byteWritten += 2 * numElems;
+        bytesWritten += 2 * numElems;
         break;
     }
     default:
@@ -778,7 +689,7 @@ void WavOutFile::write(const double *buffer, int numElems)
 
     bytesPerSample = header.format.bits_per_sample / 8;
     numBytes = numElems * bytesPerSample;
-    short *temp = (short*)getConvBuffer(numBytes);
+    short *temp = (short*)getConvBuf(numBytes);
 
     switch (bytesPerSample)
     {
@@ -798,7 +709,7 @@ void WavOutFile::write(const double *buffer, int numElems)
             for (int i = 0; i < numElems; i ++)
             {
                 short value = (short)saturate(buffer[i] * 32768.0, -32768.0, 32767.0);
-                temp2[i] = _swap16(value);
+                temp2[i] = value;
             }
             break;
         }
@@ -808,8 +719,8 @@ void WavOutFile::write(const double *buffer, int numElems)
             char *temp2 = (char *)temp;
             for (int i = 0; i < numElems; i ++)
             {
-                int value = saturate(buffer[i] * 8388608.0f, -8388608.0f, 8388607.0f);
-                *((int*)temp2) = _swap32(value);
+                int value = saturate(buffer[i] * 8388608.0, -8388608.0, 8388607.0);
+                *((int*)temp2) = value;
                 temp2 += 3;
             }
             break;
@@ -821,7 +732,7 @@ void WavOutFile::write(const double *buffer, int numElems)
             for (int i = 0; i < numElems; i ++)
             {
                 int value = saturate(buffer[i] * 2147483648.0, -2147483648.0, 2147483647.0);
-                temp2[i] = _swap32(value);
+                temp2[i] = value;
             }
             break;
         }
@@ -830,7 +741,7 @@ void WavOutFile::write(const double *buffer, int numElems)
             assert(false);
     }
 
-    int res = (int)fwrite(temp, 1, numBytes, fptr);
+    int res = (int)fwrite(temp, 1, numBytes, fp);
 
     if (res != numBytes)
     {

@@ -1,14 +1,17 @@
 #ifndef PARSEPARAMETER_H
 #define PARSEPARAMETER_H
 
+#include <string>
+
+using namespace std;
+
 class ParseParameter
 {
-private:
-    char *inFileName = NULL;
-    char *outFileName = NULL;
-    double pitch = 0.0;
-
 public:
+    double pitch;
+    char *inFileName;
+    char *outFileName;
+
     char *getInFileName() const;
     void setInFileName(char *value);
     char *getOutFileName() const;
@@ -23,34 +26,5 @@ public:
     void checkLimits();
 };
 
+
 #endif // PARSEPARAMETER_H
-
-
-char *ParseParameter::getOutFileName() const
-{
-    return outFileName;
-}
-
-void ParseParameter::setOutFileName(char *value)
-{
-    outFileName = value;
-}
-
-double ParseParameter::getPitch() const
-{
-return pitch;
-}
-
-void ParseParameter::setPitch(double value)
-{
-pitch = value;
-}
-char *ParseParameter::getInFileName() const
-{
-    return inFileName;
-}
-
-void ParseParameter::setInFileName(char *value)
-{
-    inFileName = value;
-}

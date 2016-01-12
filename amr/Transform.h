@@ -1,8 +1,6 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-namespace Transform {
-
 class Transform {
 public:
     // Discrete Fourier Transform
@@ -13,7 +11,6 @@ public:
 
 private:
 };
-}
 
 
 #endif // TRANSFORM_H
