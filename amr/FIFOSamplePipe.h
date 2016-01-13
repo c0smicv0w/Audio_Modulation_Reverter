@@ -1,6 +1,8 @@
 #ifndef FIFOSAMPLEPIPE_H
 #define FIFOSAMPLEPIPE_H
 
+typedef float SAMPLETYPE;
+
 namespace amr {
 
 

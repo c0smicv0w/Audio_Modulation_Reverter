@@ -11,7 +11,7 @@ using namespace std;
 
 static const char riffStr[] = "RIFF";
 static const char waveStr[] = "WAVE";
-static const char fmtStr[]  = "fmt";
+static const char fmtStr[]  = "fmt ";
 static const char factStr[] = "fact";
 static const char dataStr[] = "data";
 

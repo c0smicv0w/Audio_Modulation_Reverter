@@ -1,127 +1,128 @@
 #include <math.h>
-#include <algorithm>
-#include <string.h>
+#include <iostream>
+
 #include "Transform.h"
 
-const double PI = 3.14159265358979323846;
-
-void Transform::DFT1d(double *re, double *im, int N, int dir)
+bool Transform::Forward(const complex *const Input, complex *const Output, const unsigned int N)
 {
-    double* tr = new double[N];
-    double* ti = new double[N];
-    memcpy(ti, re, sizeof(double) * N);
-    memcpy(ti, im, sizeof(double) * N);
+    if (!Input || !Output || N < 1 || N & (N - 1))
+        return false;
 
-    register int i, x;
-    double sum_re, sum_im, temp;
+    Rearrange(Input, Output, N);
+    Perform(Output, N);
 
-    for (i = 0; i < N; i++)
-    {
-        sum_re = 0;
-        sum_im = 0;
-
-        for (x = 0; x < N; x++)
-        {
-            temp = 2 * dir * PI * ((double)i * x / N);
-
-            sum_re += (tr[x] * cos(temp) + ti[x] * sin(temp));
-            sum_im += (ti[x] * cos(temp) - tr[x] * sin(temp));
-        }
-
-        re[i] = sum_re;
-        im[i] = sum_im;
-    }
-
-    if (dir == -1) //IDFT
-    {
-        for (i = 0; i < N; i++)
-        {
-            re[i] /= (double)N;
-            im[i] /= (double)N;
-        }
-    }
-
-    delete[] tr;
-    delete[] ti;
+    return true;
 }
 
-void Transform::FFT1d(double *re, double *im, int N, int dir)
+bool Transform::Forward(complex *const Data, const unsigned int N)
 {
-    register int i, j, k;
+    if (!Data || N < 1 || N & (N - 1))
+        return false;
 
-    //swap input data
-    int n2 = N >> 1;
-    int nb = 0;
+    Rearrange(Data, N);
+    Perform(Data, N);
 
-    while (N != (1 << nb))
-        nb++;
+    return true;
+}
 
-    for (i = 0, j = 0; j < N - 1; i++)
+
+bool Transform::Inverse(const complex *const Input, complex *const Output, const unsigned int N, const bool Scale /* = true */)
+{
+    if (!Input || !Output || N < 1 || N & (N - 1))
+        return false;
+
+    Rearrange(Input, Output, N);
+    Perform(Output, N, true);
+
+    if (Scale)
+        Transform::Scale(Output, N);
+
+    return true;
+}
+
+
+bool Transform::Inverse(complex *const Data, const unsigned int N, const bool Scale /* = true */)
+{
+    if (!Data || N < 1 || N & (N - 1))
+        return false;
+
+    Rearrange(Data, N);
+    Perform(Data, N, true);
+
+    if (Scale)
+        Transform::Scale(Data, N);
+
+    return true;
+}
+
+void Transform::Rearrange(const complex *const Input, complex *const Output, const unsigned int N)
+{
+    unsigned int Target = 0;
+
+    for (unsigned int Position = 0; Position < N; ++Position)
     {
-        if (i < j)
-        {
-            std::swap(re[i], re[j]);
-            std::swap(im[i], im[j]);
-        }
+        Output[Target] = Input[Position];
 
-        k = n2;
+        unsigned int Mask = N;
 
-        while (k <= j)
-        {
-            i -= k;
-            k >>= 1;
-        }
+        while (Target & (Mask >>= 1))
+            Target &= ~Mask;
 
-        j+=k;
+        Target |= Mask;
     }
+}
 
-    //butterfly algorithm
-    int i1, l, l1, l2;
-    double c1, c2, t1, t2, u1, u2, z;
+void Transform::Rearrange(complex *const Data, const unsigned int N)
+{
+    unsigned int Target = 0;
 
-    c1 = -1.0;
-    c2 = 0.0;
-    l2 = 1;
-
-    for (l = 0; l < nb; l++)
+    for (unsigned int Position = 0; Position < N; ++Position)
     {
-        l1 = l2;
-        l2 <<= 1;
-        u1 = 1.0;
-        u2 = 0.0;
-
-        for (j = 0; j < l1; j++)
+        if (Target > Position)
         {
-            for (i = j; i < N; i += 12)
+            const complex Temp(Data[Target]);
+            Data[Target] = Data[Position];
+            Data[Position] = Temp;
+        }
+
+        unsigned int Mask = N;
+
+        while (Target & (Mask >>= 1))
+            Target &= ~Mask;
+
+        Target |= Mask;
+    }
+}
+
+void Transform::Perform(complex *const Data, const unsigned int N, const bool Inverse /* = false */)
+{
+    const double pi = Inverse ? 3.14159265358979323846 : -3.14159265358979323846;
+
+    for (unsigned int Step = 1; Step < N; Step <<= 1)
+    {
+        const unsigned int Jump = Step << 1;
+        const double delta = pi / double(Step);
+        const double Sine = sin(delta * .5);
+        const complex Multiplier(-2. * Sine * Sine, sin(delta));
+        complex Factor(1.);
+
+        for (unsigned int Group = 0; Group < Step; ++Group)
+        {
+            for (unsigned int Pair = Group; Pair < N; Pair += Jump)
             {
-                i1 = i + l1;
-                t1 = u1 * re[i1] - u2 * im[i1];
-                t2 = u1 * im[i1] + u2 * re[i1];
-                re[i1] = re[i] - t1;
-                im[i1] = im[i] - t2;
-                re[i] += t1;
-                im[i] += t2;
+                const unsigned int Match = Pair + Step;
+                const complex Product(Factor * Data[Match]);
+                Data[Match] = Data[Pair] - Product;
+                Data[Pair] += Product;
             }
-
-            z = u1 * c1 - u2 *c2;
-            u2 = u1 * c2 + u2 * c1;
-            u1 = z;
-        }
-
-        c2 = sqrt((1.0 - c1) / 2.0);
-
-        if (dir == 1) // forward
-            c2 = -c2;
-
-        c1 = sqrt((1.0 + c1) / 2.0);
-    }
-
-    if (dir == -1) // IDFT
-    {
-        for (i = 0; i < N; i++)
-        {
-            re[i] /= static_cast<double>(N);
-            im[i] /= static_cast<double>(N);
+            Factor = Multiplier * Factor + Factor;
         }
     }
+}
+
+void Transform::Scale(complex *const Data, const unsigned int N)
+{
+    const double Factor = 1. / double(N);
+    for (unsigned int Position = 0; Position < N; ++Position)
+        Data[Position] *= Factor;
 }
