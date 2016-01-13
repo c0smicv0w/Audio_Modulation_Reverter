@@ -12,4 +12,5 @@ HEADERS += \
     amr.h \
     Transform.h \
     ParseParameter.h \
-    WaveFile.h
+    WaveFile.h \
+    FIFOSamplePipe.h
