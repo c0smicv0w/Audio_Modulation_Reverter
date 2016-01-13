@@ -6,7 +6,8 @@ CONFIG -= qt
 SOURCES += main.cpp \
     Transform.cpp \
     ParseParameter.cpp \
-    WaveFile.cpp
+    WaveFile.cpp \
+    FIFOSamplePipe.cpp
 
 HEADERS += \
     amr.h \
