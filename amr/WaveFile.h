@@ -1,6 +1,7 @@
 #ifndef WAVEFILE
 #define WAVEFILE
 
+#include <stdint.h>
 
 #ifndef uint
 typedef unsigned int uint;
