@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "ParseParameter.h"
 #include "WaveFile.h"
 #include "Transform.h"
+
+
+#define SEMITONE 1.0594630943592952645618252949463
 
 using namespace std;
 
@@ -63,7 +67,7 @@ void analyze(WavInFile *inFile, WavOutFile *outFile)
         complex *temp = new complex[windowSize];
 
         size = inFile->read(re, windowSize);
-        int nSamples = size / (int)inFile->getNumChannels();
+
 
         for (int i = 0; i < size; i++)
         {
@@ -77,25 +81,29 @@ void analyze(WavInFile *inFile, WavOutFile *outFile)
 
         //}
 
-
-
-        test.Forward(com, temp, nSamples);
-        // double pitch
+        int pitch = 4;
 
 
 
-        for (int i = 0; i < windowSize / 1.26; i++)
+        test.Forward(com, temp, size);
+
+
+        for (int i = 0; i < size / pow(SEMITONE, pitch); i++)
         {
-            output[(int)((double(i) * 1.26))] = temp[i];
-            //output[i * 2] = temp[i];
-            //output[i * 2] = temp[i];
+            output[(int)((double)i * (pow(SEMITONE, pitch)))] = temp[i];
         }
-
 
 
         test.Inverse(output, size);
 
 
+        for (int i = 1; i < size - 1; i++)
+        {
+            if (output[i].re() == 0)
+            {
+                output[i] = (double)((output[i-1].re() + output[i+1].re())/2.0);
+            }
+        }
 
 
         for (int i = 0; i < size; i++)
