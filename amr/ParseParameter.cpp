@@ -9,7 +9,11 @@ ParseParameter::ParseParameter(const int argc, const char * const argv[])
 {
     inFileName = (char*)argv[1];
     outFileName = (char*)argv[2];
-
+    pitch = 0;
+    if (argc > 3) {
+        parseSwitchParam(argv[3]);
+        checkLimits();
+    }
 }
 
 static int _toLowerCase(int c)
