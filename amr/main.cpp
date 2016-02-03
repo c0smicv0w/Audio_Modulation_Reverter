@@ -4,10 +4,12 @@
 #include <string.h>
 #include <math.h>
 #include <cmath>
+#include <QtWidgets>
 
 #include "ParseParameter.h"
 #include "WaveFile.h"
 #include "Transform.h"
+#include "audioinput.h"
 
 
 #define SEMITONE 1.0594630943592952645618252949463
@@ -96,7 +98,12 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
                 maxIndex = i;
             }
         }
-
+        static int index = 0;
+        cout << index++ << ": ";
+        for (int i = 0; i < 20; i++)
+            cout << sqrt(temp[i].norm()) << " ";
+        cout << sqrt(max);
+        cout << endl;
 
         FreqArray[int((maxIndex * 1.35)/10)]++;
 
@@ -115,6 +122,9 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
 
     for (int i = 1; i < 2000; i++)
     {
+        if (FreqArray[i]) {
+            cout << i <<": " <<FreqArray[i] << endl;
+        }
         if (FreqArray[i] >= maxCount) {
             maxCount = FreqArray[i];
             maxFreq = i;
@@ -123,7 +133,7 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
 
     cout << maxFreq*10 << endl;
 
-    params->pitch = logTone(600.0/(maxFreq *10));
+    params->pitch = 4;//logTone(600.0/(maxFreq *10));
     cout <<"pitch: " <<params->pitch << endl;
     inFile->rewind();
 
@@ -147,9 +157,9 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
         test.Forward(com, temp, windowSize);
 
 
-        for (int i = 0; i < (windowSize / pow(SEMITONE,4)); i++)
+        for (int i = 0; i < (windowSize / pow(SEMITONE,params->pitch)); i++)
         {
-            output[(int)((double)i * (pow(SEMITONE, 4)))] = temp[i];
+            output[(int)((double)i * (pow(SEMITONE, params->pitch)))] = temp[i];
         }
 
         for (int i = 1; i < size - 1; i++)
@@ -179,11 +189,13 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
         delete[] output;
     }
 
+
     outFile->~WavOutFile();
 }
 
 int main(int argc, char* argv[])
 {
+/*
     ParseParameter *param;
     WavInFile *inFile;
     WavOutFile *outFile;
@@ -198,9 +210,16 @@ int main(int argc, char* argv[])
 
     openFiles(&inFile, &outFile, param);
 
-    analyze(inFile, outFile, param);
+    analyze(inFile, outFile, param);*/
 
+    QApplication app(argc, argv);
+    app.setApplicationName("Audio Input Test");
 
-    return 0;
+    InputTest input;
+    input.show();
+
+    return app.exec();
+
+    //return 0;
 }
 

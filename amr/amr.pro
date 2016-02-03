@@ -1,16 +1,20 @@
 TEMPLATE = app
 CONFIG += console
-CONFIG -= app_bundle
-CONFIG -= qt
+TARGET = amr
+
+
+QT += multimedia widgets
 
 SOURCES += main.cpp \
     Transform.cpp \
     ParseParameter.cpp \
     WaveFile.cpp \
-    complex.cpp
+    complex.cpp \
+    audioinput.cpp
 
 HEADERS += \
     Transform.h \
     ParseParameter.h \
     WaveFile.h \
-    complex.h
+    complex.h \
+    audioinput.h
