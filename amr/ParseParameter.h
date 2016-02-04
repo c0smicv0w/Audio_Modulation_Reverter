@@ -11,6 +11,7 @@ public:
     double pitch;
     char *inFileName;
     char *outFileName;
+    bool realtime;
 
     char *getInFileName() const;
     void setInFileName(char *value);

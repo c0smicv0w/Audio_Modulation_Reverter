@@ -195,7 +195,8 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
 
 int main(int argc, char* argv[])
 {
-/*
+
+
     ParseParameter *param;
     WavInFile *inFile;
     WavOutFile *outFile;
@@ -205,21 +206,27 @@ int main(int argc, char* argv[])
         cout << "Usage: " << argv[0] << "inputfile outputfile [option]" << endl;
         return 0;
     }
-
-    param = new ParseParameter(argc, argv);
-
-    openFiles(&inFile, &outFile, param);
-
-    analyze(inFile, outFile, param);*/
-
     QApplication app(argc, argv);
-    app.setApplicationName("Audio Input Test");
+    app.setApplicationName("AMR");
 
     InputTest input;
     input.show();
+    QObject::connect(&app, SIGNAL(aboutToQuit()), &input, SLOT(closing()));
+    int res = app.exec();
 
-    return app.exec();
+    param = new ParseParameter(argc, argv);
 
-    //return 0;
+    if(param->realtime)
+    {
+        param->inFileName = "realtime.wav";
+    }
+
+    openFiles(&inFile, &outFile, param);
+
+    analyze(inFile, outFile, param);
+
+
+
+    return res;
 }
 

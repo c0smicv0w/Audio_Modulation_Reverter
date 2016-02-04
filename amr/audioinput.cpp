@@ -18,7 +18,7 @@
 #define RESUME_LABEL    "Resume recording"
 
 const int BufferSize = 16384;
-
+WavOutFile *wav;
 AudioInfo::AudioInfo(const QAudioFormat &format, QObject *parent)
     :   QIODevice(parent)
     ,   m_format(format)
@@ -26,7 +26,7 @@ AudioInfo::AudioInfo(const QAudioFormat &format, QObject *parent)
     ,   m_level(0.0)
 
 {
-    wav = new WavOutFile("testtest.wav", 8000, 16, 1);
+    wav = new WavOutFile("realtime.wav", 8000, 16, 1);
     switch (m_format.sampleSize()) {
     case 8:
         switch (m_format.sampleType()) {
@@ -142,19 +142,13 @@ qint64 AudioInfo::writeData(const char *data, qint64 len)
                 }
 
                 maxValue = qMax(value, maxValue);
-                if (testcount < 100)
-                    wav->write(ptr, channelBytes);
+                wav->write(ptr, channelBytes);
                 ptr += channelBytes;
             }
         }
 
         maxValue = qMin(maxValue, m_maxAmplitude);
         m_level = qreal(maxValue) / m_maxAmplitude;
-
-        if (testcount == 100)
-            wav->~WavOutFile();
-        testcount++;
-
     }
 /*
     unsigned char* temp;
@@ -365,4 +359,9 @@ void InputTest::sliderChanged(int value)
 {
     if (m_audioInput)
         m_audioInput->setVolume(qreal(value) / 100);
+}
+
+void InputTest::closing()
+{
+    wav->~WavOutFile();
 }

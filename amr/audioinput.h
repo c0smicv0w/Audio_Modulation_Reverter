@@ -12,6 +12,8 @@
 #include <QWidget>
 #include "WaveFile.h"
 
+
+
 class AudioInfo : public QIODevice
 {
     Q_OBJECT
@@ -20,9 +22,6 @@ public:
     AudioInfo(const QAudioFormat &format, QObject *parent);
     ~AudioInfo();
 
-    WavOutFile *wav;
-
-    int testcount = 0;
 
     void start();
     void stop();
@@ -80,6 +79,7 @@ private slots:
     void toggleSuspend();
     void deviceChanged(int index);
     void sliderChanged(int value);
+    void closing();
 
 private:
     // Owned by layout

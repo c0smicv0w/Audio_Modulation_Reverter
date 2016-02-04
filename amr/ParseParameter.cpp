@@ -9,7 +9,13 @@ ParseParameter::ParseParameter(const int argc, const char * const argv[])
 {
     inFileName = (char*)argv[1];
     outFileName = (char*)argv[2];
+    realtime = false;
     pitch = 0;
+    if (((string)(argv[1]))[0] == '-')
+    {
+
+        parseSwitchParam(argv[1]);
+    }
     if (argc > 3) {
         parseSwitchParam(argv[3]);
         checkLimits();
@@ -42,6 +48,9 @@ void ParseParameter::parseSwitchParam(const string &str)
     case 'p':
         // '-pitch=xx'
         this->pitch = parseOption(str);
+        break;
+    case 'r':
+        realtime = true;
         break;
     default:
         string msg = "ERROR: Illegal parameter";
