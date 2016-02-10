@@ -10,11 +10,13 @@ SOURCES += main.cpp \
     ParseParameter.cpp \
     WaveFile.cpp \
     complex.cpp \
-    audioinput.cpp
+    audioinput.cpp \
+    audiomodulator.cpp
 
 HEADERS += \
     Transform.h \
     ParseParameter.h \
     WaveFile.h \
     complex.h \
-    audioinput.h
+    audioinput.h \
+    audiomodulator.h
