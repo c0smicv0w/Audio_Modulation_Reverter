@@ -5,18 +5,19 @@ TARGET = amr
 
 QT += multimedia widgets core
 
-SOURCES += main.cpp \
-    Transform.cpp \
-    ParseParameter.cpp \
-    WaveFile.cpp \
-    complex.cpp \
-    audioinput.cpp \
-    audiomodulator.cpp
+SOURCES += \
+    ../src/audioinput.cpp \
+    ../src/audiomodulator.cpp \
+    ../src/complex.cpp \
+    ../src/main.cpp \
+    ../src/ParseParameter.cpp \
+    ../src/Transform.cpp \
+    ../src/WaveFile.cpp
 
 HEADERS += \
-    Transform.h \
-    ParseParameter.h \
-    WaveFile.h \
-    complex.h \
-    audioinput.h \
-    audiomodulator.h
+    ../src/audioinput.h \
+    ../src/audiomodulator.h \
+    ../src/complex.h \
+    ../src/ParseParameter.h \
+    ../src/Transform.h \
+    ../src/WaveFile.h

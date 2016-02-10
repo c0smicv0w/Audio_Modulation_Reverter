@@ -1,5 +1,5 @@
 #include "audiomodulator.h"
-#include <Transform.h>
+#include "Transform.h"
 #include <math.h>
 
 #define SEMITONE 1.0594630943592952645618252949463
@@ -75,11 +75,11 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
 
 
-    double *outputCom = new double[size];               // pitch scaling
+    complex *outputCom = new complex[size];               // pitch scaling
 
     for (int i = 0; i < pow(SEMITONE, pitch); i++)
     {
-        outputCom[(int)((double)i * (pow(SEMITONE, pitch)))] = inputCom[i].re();
+        outputCom[(int)((double)i * (pow(SEMITONE, pitch)))] = inputCom[i];
     }
 
     for (int i = 0; i < size; i++)
