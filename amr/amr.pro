@@ -10,14 +10,15 @@ SOURCES += \
     ../src/audiomodulator.cpp \
     ../src/complex.cpp \
     ../src/main.cpp \
-    ../src/ParseParameter.cpp \
-    ../src/Transform.cpp \
-    ../src/WaveFile.cpp
+    ../test/pitchshifttest.cpp \
+    ../src/parseparameter.cpp \
+    ../src/transform.cpp \
+    ../src/wavefile.cpp
 
 HEADERS += \
     ../src/audioinput.h \
     ../src/audiomodulator.h \
     ../src/complex.h \
-    ../src/ParseParameter.h \
-    ../src/Transform.h \
-    ../src/WaveFile.h
+    ../src/parseparameter.h \
+    ../src/transform.h \
+    ../src/wavefile.h

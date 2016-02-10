@@ -6,9 +6,9 @@
 #include <cmath>
 #include <QtWidgets>
 
-#include "ParseParameter.h"
-#include "WaveFile.h"
-#include "Transform.h"
+#include "parseparameter.h"
+#include "wavefile.h"
+#include "transform.h"
 #include "audioinput.h"
 
 

@@ -1,5 +1,5 @@
 #include "audiomodulator.h"
-#include "Transform.h"
+#include "transform.h"
 #include <math.h>
 
 #define SEMITONE 1.0594630943592952645618252949463
