@@ -10,7 +10,7 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QWidget>
-#include "WaveFile.h"
+#include "wavefile.h"
 
 
 

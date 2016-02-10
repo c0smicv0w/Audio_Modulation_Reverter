@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <stdexcept>
 
-#include "WaveFile.h"
+#include "wavefile.h"
 
 using namespace std;
 

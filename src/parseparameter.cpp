@@ -1,6 +1,6 @@
 #include <stdexcept>
 #include <stdlib.h>
-#include "ParseParameter.h"
+#include "parseparameter.h"
 
 using namespace std;
 

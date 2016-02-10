@@ -1,7 +1,7 @@
 #include <math.h>
 #include <iostream>
 
-#include "Transform.h"
+#include "transform.h"
 
 bool Transform::Forward(const complex *const Input, complex *const Output, const unsigned int N)
 {
