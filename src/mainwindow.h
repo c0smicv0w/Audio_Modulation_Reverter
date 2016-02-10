@@ -17,12 +17,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     AudioMgr mgr;
+    void setControl();
 
 
 private slots:
     void on_actionRecord_triggered();
     void on_actionSuspend_triggered();
     void on_actionStop_triggered();
+
+    void on_actionResume_triggered();
 
 private:
     Ui::MainWindow *ui;

@@ -60,6 +60,7 @@
    </attribute>
    <addaction name="actionRecord"/>
    <addaction name="actionSuspend"/>
+   <addaction name="actionResume"/>
    <addaction name="actionStop"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -76,6 +77,11 @@
   <action name="actionStop">
    <property name="text">
     <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionResume">
+   <property name="text">
+    <string>Resume</string>
    </property>
   </action>
  </widget>

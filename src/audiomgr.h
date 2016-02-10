@@ -18,12 +18,18 @@ public:
     AudioMgr();
     ~AudioMgr();
 
+    typedef enum
+    {
+        Closed, Active, Suspended
+    }State;
+    State state = Closed;
 //private:
     void initializeAudio();
     void createAudioInput();
     void createAudioOutput();
     void start();
     void suspend();
+    void resume();
     void stop();
 
 //private:
@@ -35,6 +41,7 @@ public:
     QIODevice *m_input;
     QIODevice *m_output;
     QByteArray m_buffer;
+    QByteArray m_totalBuffer;
 
 private slots:
     void processing();

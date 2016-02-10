@@ -1,6 +1,7 @@
 #include "audiomgr.h"
 
 const int BufferSize = 4096;
+const int ProcessSize = 1024;
 
 AudioMgr::AudioMgr():
     m_Inputdevice(QAudioDeviceInfo::defaultInputDevice()),
@@ -24,7 +25,7 @@ void AudioMgr::initializeAudio()
     m_format.setSampleRate(8000); //set SampleRate
     m_format.setChannelCount(1); //set channelCount to mono
     m_format.setSampleSize(16); //set sample size to 16 bit
-    m_format.setSampleType(QAudioFormat::SignedInt ); //Sample type as usigned integer sample
+    m_format.setSampleType(QAudioFormat::SignedInt ); //Sample type as signed integer sample
     m_format.setByteOrder(QAudioFormat::LittleEndian); //Byte order
     m_format.setCodec("audio/pcm"); //set codec as simple audio/pcm
 
@@ -83,16 +84,35 @@ void AudioMgr::processing()
     //Read sound samples from input device to buffer
     qint64 l = m_input->read(m_buffer.data(), len);
 
+    // Return if suspend is triggered
+    if(state == Suspended)
+        return;
 
 
+    if (l <= 0)
+        return;
+    m_totalBuffer.append(m_buffer.constData(), l);
 
+    while(true)
+    {
+        qint64 size = m_totalBuffer.size();
+        if(  size < ProcessSize )
+            break;
+        QByteArray tmp = m_totalBuffer.left(ProcessSize);
+        m_totalBuffer = m_totalBuffer.mid(ProcessSize);
+        qDebug() << "write =" << m_output->write(tmp);
+
+    }
+
+
+/*
     if(l > 0)
     {
-        static int acc = 0;
-        qDebug() << acc << len << l;
-        acc += l;
+
+
         //Assign sound samples to short array
         short* pcmData = (short*)m_buffer.data();
+
 
         //write sound sample to outputdevice for playback audio
         static bool first = true;
@@ -102,13 +122,16 @@ void AudioMgr::processing()
                qDebug() << "write =" << m_output->write((char*)pcmData, len);
         }
         qDebug() << "write =" << m_output->write((char*)pcmData, len);
-    }
 
+    }
+    */
 }
 
 
 void AudioMgr::start()
 {
+
+    state = Active;
     //Audio output device
     m_output= m_audioOutput->start();
      //Audio input device
@@ -118,3 +141,19 @@ void AudioMgr::start()
     connect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
 
 }
+
+void AudioMgr::suspend()
+{
+    state = Suspended;
+}
+void AudioMgr::resume()
+{
+    state = Active;
+}
+
+void AudioMgr::stop()
+{
+    state = Closed;
+    disconnect(m_input, SIGNAL(readyRead()));
+}
+
