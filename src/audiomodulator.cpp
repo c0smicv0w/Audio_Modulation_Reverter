@@ -42,12 +42,12 @@ void AudioModulator::pitchShift(AudioDataParam param)
 {
     Transform trans;
 
-    char* tempIn = param.pcmIn.data();
-    int numElems = param.pcmIn.size();
-    int bytesPerSample = audioFormat.sampleSize() / 8;
+    char* tempIn = param.pcmIn->data();
+    int numElems = param.pcmIn->size();
+    int bytesPerSample = 2;//audioFormat.sampleSize() / 8;
     int size = numElems/bytesPerSample;
     double *buffer = new double[size];
-
+    complex *inputCom = new complex[size];
     short *tempIn2 = (short*)tempIn;                        // pcm convert
     double conv = 1.0 / 32768.0;
     for (int i = 0; i < numElems; i++)
@@ -57,7 +57,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
     }
 
 
-    complex *inputCom = new complex[size];              // fft
+            // fft
 
     for (int i = 0 ; i < size; i++)
     {
@@ -68,7 +68,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     for (int i = 0; i < size; i++)
     {
-        param.freqIn.append(inputCom[i]);
+        param.freqIn->append(inputCom[i]);
     }
 
 
@@ -84,7 +84,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     for (int i = 0; i < size; i++)
     {
-        param.freqOut.append(outputCom[i]);
+        param.freqOut->append(outputCom[i]);
     }
 
 
@@ -93,14 +93,14 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     trans.Inverse(outputCom, size);                     // Ifft
 
-    short *tempOut = new short[param.pcmIn.size()];
+    short *tempOut = new short[param.pcmIn->size()];
 
     short *tempOut2 = (short *)tempOut;
     for (int i = 0; i < numElems; i ++)
     {
         short value = (short)saturate(buffer[i] * 32768.0, -32768.0, 32767.0);
         tempOut2[i] = value;
-        param.pcmOut.append(tempOut2[i]);
+        param.pcmOut->append(tempOut2[i]);
     }
 
 

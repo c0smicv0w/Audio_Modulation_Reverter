@@ -7,10 +7,10 @@
 #include "complex.h"
 
 typedef struct {
-    QByteArray &pcmIn;
-    QList<complex> &freqIn;
-    QByteArray &pcmOut;
-    QList<complex> &freqOut;
+    QByteArray *pcmIn;
+    QList<complex> *freqIn;
+    QByteArray *pcmOut;
+    QList<complex> *freqOut;
 }AudioDataParam;
 
 class AudioModulator

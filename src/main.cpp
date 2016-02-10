@@ -192,7 +192,7 @@ void analyze(WavInFile *inFile, WavOutFile *outFile, ParseParameter *params)
 
     outFile->~WavOutFile();
 }
-
+/*
 int main(int argc, char* argv[])
 {
 
@@ -228,5 +228,7 @@ int main(int argc, char* argv[])
 
 
     return res;
+
 }
 
+*/
