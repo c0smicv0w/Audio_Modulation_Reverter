@@ -9,6 +9,7 @@
 #include <qaudiooutput.h>
 
 #include <QDebug>
+#include "audiomodulator.h"
 
 
 class AudioMgr : public QObject
@@ -23,6 +24,9 @@ public:
         Closed, Active, Suspended
     }State;
     State state = Closed;
+
+    AudioModulator am;
+
 //private:
     void initializeAudio();
     void createAudioInput();

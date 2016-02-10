@@ -4,6 +4,7 @@
 #include <cstring>
 #include <ctype.h>
 #include <stdexcept>
+#include <string>
 
 #include "wavefile.h"
 

@@ -14,9 +14,25 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    audiomgr.cpp
+    audiomgr.cpp \
+    audiomodulator.cpp \
+    complex.cpp \
+    freqwidget.cpp \
+    parseparameter.cpp \
+    pcmwidget.cpp \
+    transform.cpp \
+    wavefile.cpp
 
 HEADERS  += mainwindow.h \
-    audiomgr.h
+    audiomgr.h \
+    audiomodulator.h \
+    complex.h \
+    freqwidget.h \
+    parseparameter.h \
+    pcmwidget.h \
+    transform.h \
+    wavefile.h
 
 FORMS    += mainwindow.ui
+
+CONFIG   += c++11

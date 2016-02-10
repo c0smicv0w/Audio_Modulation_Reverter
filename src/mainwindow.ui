@@ -16,10 +16,10 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="QWidget" name="widget" native="true"/>
+     <widget class="PcmWidget" name="widget" native="true"/>
     </item>
     <item row="1" column="0">
-     <widget class="QWidget" name="widget_2" native="true"/>
+     <widget class="FreqWidget" name="widget_2" native="true"/>
     </item>
    </layout>
   </widget>
@@ -86,6 +86,20 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>PcmWidget</class>
+   <extends>QWidget</extends>
+   <header>pcmwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FreqWidget</class>
+   <extends>QWidget</extends>
+   <header>freqwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

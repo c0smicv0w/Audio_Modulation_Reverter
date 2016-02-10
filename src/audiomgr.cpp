@@ -11,7 +11,7 @@ AudioMgr::AudioMgr():
     m_input(0),
     m_buffer(BufferSize, 0)
 {
-
+    am.setPitch(4);
 }
 
 AudioMgr::~AudioMgr()
@@ -22,7 +22,7 @@ AudioMgr::~AudioMgr()
 //Initialize audio format
 void AudioMgr::initializeAudio()
 {
-    m_format.setSampleRate(8000); //set SampleRate
+    m_format.setSampleRate(44100); //set SampleRate
     m_format.setChannelCount(1); //set channelCount to mono
     m_format.setSampleSize(16); //set sample size to 16 bit
     m_format.setSampleType(QAudioFormat::SignedInt ); //Sample type as signed integer sample
@@ -98,9 +98,26 @@ void AudioMgr::processing()
         qint64 size = m_totalBuffer.size();
         if(  size < ProcessSize )
             break;
-        QByteArray tmp = m_totalBuffer.left(ProcessSize);
+
+        QByteArray pcmIn;
+        QList<complex> freqIn;
+        QByteArray pcmOut;
+        QList<complex> freqOut;
+
+
+
+        pcmIn = m_totalBuffer.left(ProcessSize);
         m_totalBuffer = m_totalBuffer.mid(ProcessSize);
-        qDebug() << "write =" << m_output->write(tmp);
+
+        AudioDataParam param;
+        param.pcmIn = &pcmIn;
+        param.freqIn = &freqIn;
+        param.pcmOut = &pcmOut;
+        param.freqOut = &freqOut;
+        am.pitchShift(param);
+
+
+        qDebug() << "write =" << m_output->write(*param.pcmOut);
 
     }
 
