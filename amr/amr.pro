@@ -3,18 +3,21 @@ CONFIG += console
 TARGET = amr
 
 
-QT += multimedia widgets
+QT += multimedia widgets core
 
-SOURCES += main.cpp \
-    Transform.cpp \
-    ParseParameter.cpp \
-    WaveFile.cpp \
-    complex.cpp \
-    audioinput.cpp
+SOURCES += \
+    ../src/audioinput.cpp \
+    ../src/audiomodulator.cpp \
+    ../src/complex.cpp \
+    ../test/pitchshifttest.cpp \
+    ../src/parseparameter.cpp \
+    ../src/transform.cpp \
+    ../src/wavefile.cpp
 
 HEADERS += \
-    Transform.h \
-    ParseParameter.h \
-    WaveFile.h \
-    complex.h \
-    audioinput.h
+    ../src/audioinput.h \
+    ../src/audiomodulator.h \
+    ../src/complex.h \
+    ../src/parseparameter.h \
+    ../src/transform.h \
+    ../src/wavefile.h
