@@ -24,7 +24,7 @@ void AudioMgr::initializeAudio()
     m_format.setSampleRate(8000); //set SampleRate
     m_format.setChannelCount(1); //set channelCount to mono
     m_format.setSampleSize(16); //set sample size to 16 bit
-    m_format.setSampleType(QAudioFormat::UnSignedInt ); //Sample type as usigned integer sample
+    m_format.setSampleType(QAudioFormat::SignedInt ); //Sample type as usigned integer sample
     m_format.setByteOrder(QAudioFormat::LittleEndian); //Byte order
     m_format.setCodec("audio/pcm"); //set codec as simple audio/pcm
 
@@ -63,8 +63,6 @@ void AudioMgr::createAudioInput()
         m_input = 0;
     }
     m_audioInput = new QAudioInput(m_Inputdevice, m_format, this);
-    m_audioInput->setBufferSize(8192);
-    m_audioInput->start();
 
 }
 
@@ -85,20 +83,24 @@ void AudioMgr::processing()
     //Read sound samples from input device to buffer
     qint64 l = m_input->read(m_buffer.data(), len);
 
-    static int acc = 0;
-    qDebug() << acc << len << l;
-    acc += l;
+
 
 
     if(l > 0)
     {
+        static int acc = 0;
+        qDebug() << acc << len << l;
+        acc += l;
         //Assign sound samples to short array
         short* pcmData = (short*)m_buffer.data();
 
         //write sound sample to outputdevice for playback audio
-
-        qDebug() << l<< m_audioOutput->periodSize();
-
+        static bool first = true;
+        if(first){
+            first = false;
+            for(int i = 0; i < 10; i++)
+               qDebug() << "write =" << m_output->write((char*)pcmData, len);
+        }
         qDebug() << "write =" << m_output->write((char*)pcmData, len);
     }
 
@@ -113,6 +115,6 @@ void AudioMgr::start()
     m_input = m_audioInput->start();
     //connect readyRead signal to processing slot.
     //Call processing when audio samples fill in inputbuffer
-    connect(m_input, SIGNAL(readyRead()), SLOT(processing()));
+    connect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
 
 }
