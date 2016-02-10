@@ -3,7 +3,7 @@ CONFIG += console
 TARGET = amr
 
 
-QT += multimedia widgets
+QT += multimedia widgets core
 
 SOURCES += main.cpp \
     Transform.cpp \
