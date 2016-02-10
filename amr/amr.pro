@@ -9,7 +9,6 @@ SOURCES += \
     ../src/audioinput.cpp \
     ../src/audiomodulator.cpp \
     ../src/complex.cpp \
-    ../src/main.cpp \
     ../test/pitchshifttest.cpp \
     ../src/parseparameter.cpp \
     ../src/transform.cpp \
