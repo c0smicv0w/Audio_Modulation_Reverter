@@ -1,7 +1,5 @@
 #include "pcmwidget.h"
 
-
-
 PcmWidget::PcmWidget(QWidget *parent) : QWidget(parent)
 {
 }
@@ -11,10 +9,10 @@ void PcmWidget::clear()
   items.clear();
 }
 
-void PcmWidget::add(QByteArray& pcm, QPen pen)
+void PcmWidget::add(QByteArray* pcm, QPen pen)
 {
   Item item;
-  item.pcm_ = pcm;
+  item.pcm_ = *pcm;
   item.pen_ = pen;
   items.push_back(item);
 }

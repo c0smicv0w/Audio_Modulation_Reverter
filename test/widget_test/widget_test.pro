@@ -12,14 +12,25 @@ TARGET = widget_test
 TEMPLATE = app
 CONFIG += c++11
 
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     ../../src/pcmwidget.cpp \
-    ../../src/freqwidget.cpp
+    ../../src/freqwidget.cpp \
+    ../../src/audiomgr.cpp \
+    ../../src/audiomodulator.cpp \
+    ../../src/complex.cpp \
+    ../../src/parseparameter.cpp \
+    ../../src/transform.cpp \
+    ../../src/wavefile.cpp
 
 HEADERS  += mainwindow.h \
     ../../src/pcmwidget.h \
-    ../../src/freqwidget.h
+    ../../src/freqwidget.h \
+    ../../src/audiomgr.h \
+    ../../src/audiomodulator.h \
+    ../../src/complex.h \
+    ../../src/parseparameter.h \
+    ../../src/transform.h \
+    ../../src/wavefile.h
 
 FORMS    += mainwindow.ui

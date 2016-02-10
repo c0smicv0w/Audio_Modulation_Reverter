@@ -21,7 +21,7 @@ public:
   QAudioFormat audioFormat;
 
   void clear();
-  void add(QByteArray& pcm, QPen pen);
+  void add(QByteArray* pcm, QPen pen);
 
 protected:
   QList<Item> items;

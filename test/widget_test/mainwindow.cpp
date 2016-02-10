@@ -26,7 +26,7 @@ void MainWindow::on_pushButton_clicked()
     pcm.append(ch1);
     pcm.append(ch2);
   }
-  ui->pcmWidget->add(pcm, QPen(Qt::white));
+  ui->pcmWidget->add(&pcm, QPen(Qt::white));
 
   pcm.clear();
   for (int i = 0; i < 44100; i++) {
@@ -37,7 +37,7 @@ void MainWindow::on_pushButton_clicked()
     pcm.append(ch1);
     pcm.append(ch2);
   }
-  ui->pcmWidget->add(pcm, QPen(Qt::gray));
+  ui->pcmWidget->add(&pcm, QPen(Qt::gray));
 
   ui->pcmWidget->repaint();
 }
