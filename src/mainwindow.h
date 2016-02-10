@@ -19,6 +19,9 @@ public:
     AudioMgr mgr;
     void setControl();
 
+public slots:
+    void draw(AudioDataParam param);
+
 
 private slots:
     void on_actionRecord_triggered();

@@ -104,7 +104,10 @@ void AudioMgr::processing()
         QByteArray pcmOut;
         QList<complex> freqOut;
 
-
+        pcmIn.clear();
+        freqIn.clear();
+        pcmOut.clear();
+        freqOut.clear();
 
         pcmIn = m_totalBuffer.left(ProcessSize);
         m_totalBuffer = m_totalBuffer.mid(ProcessSize);
@@ -116,8 +119,11 @@ void AudioMgr::processing()
         param.freqOut = &freqOut;
         am.pitchShift(param);
 
+        emit dataAvail(param);
 
-        qDebug() << "write =" << m_output->write(*param.pcmOut);
+        qDebug() << "write =" << m_output->write(*param.pcmIn);
+
+
 
     }
 

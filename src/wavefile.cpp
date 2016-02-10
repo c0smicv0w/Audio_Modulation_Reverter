@@ -16,7 +16,6 @@ static const char fmtStr[]  = "fmt ";
 static const char factStr[] = "fact";
 static const char dataStr[] = "data";
 
-
 //WavFileGeneric
 WavFileGeneric::WavFileGeneric()
 {
@@ -41,7 +40,6 @@ void *WavFileGeneric::getConvBuf(int sizeByte)
     }
     return convBuf;
 }
-
 
 
 //WavinFile

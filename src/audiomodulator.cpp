@@ -50,7 +50,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
     complex *inputCom = new complex[size];
     short *tempIn2 = (short*)tempIn;                        // pcm convert
     double conv = 1.0 / 32768.0;
-    for (int i = 0; i < numElems; i++)
+    for (int i = 0; i < size; i++)
     {
         short value = tempIn2[i];
         buffer[i] = (double)(value * conv);
@@ -102,6 +102,8 @@ void AudioModulator::pitchShift(AudioDataParam param)
         tempOut2[i] = value;
         param.pcmOut->append(tempOut2[i]);
     }
+
+
 
 
 

@@ -49,6 +49,9 @@ public:
 
 private slots:
     void processing();
+
+signals:
+    void dataAvail(AudioDataParam param);
 };
 
 

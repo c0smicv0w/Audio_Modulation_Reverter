@@ -16,10 +16,10 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="PcmWidget" name="widget" native="true"/>
+     <widget class="PcmWidget" name="pcmWidget" native="true"/>
     </item>
     <item row="1" column="0">
-     <widget class="FreqWidget" name="widget_2" native="true"/>
+     <widget class="FreqWidget" name="freqWidget" native="true"/>
     </item>
    </layout>
   </widget>
