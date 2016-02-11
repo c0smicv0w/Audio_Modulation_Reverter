@@ -20,6 +20,7 @@ private:
     double pitch;
 
 public:
+    AudioModulator() {  pitch = 0;  }
     void pitchShift(AudioDataParam param);
 
     double getPitch() const;
