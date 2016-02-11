@@ -1,6 +1,7 @@
 #include "audiomodulator.h"
 #include "transform.h"
 #include <math.h>
+#include <string.h>
 
 #define SEMITONE 1.0594630943592952645618252949463
 
@@ -48,7 +49,12 @@ void AudioModulator::pitchShift(AudioDataParam param)
     int size = numElems/bytesPerSample;
     double *buffer = new double[size];
     complex *inputCom = new complex[size];
-    short *tempIn2 = (short*)tempIn;                        // pcm convert
+
+
+    short *tempIn2 = new short[size];                        // pcm convert
+
+    memcpy(tempIn2, (short*)tempIn, sizeof(short)*size);
+
     double conv = 1.0 / 32768.0;
     for (int i = 0; i < size; i++)
     {
@@ -73,11 +79,9 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
 
 
-
-
     complex *outputCom = new complex[size];               // pitch scaling
 
-    for (int i = 0; i < pow(SEMITONE, pitch); i++)
+    for (int i = 0; i < size / pow(SEMITONE, pitch); i++)
     {
         outputCom[(int)((double)i * (pow(SEMITONE, pitch)))] = inputCom[i];
     }
@@ -93,18 +97,20 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     trans.Inverse(outputCom, size);                     // Ifft
 
-    short *tempOut = new short[param.pcmIn->size()];
+    short *tempOut = new short[size];
 
     short *tempOut2 = (short *)tempOut;
-    for (int i = 0; i < numElems; i ++)
+    for (int i = 0; i < size; i ++)
     {
         short value = (short)saturate(buffer[i] * 32768.0, -32768.0, 32767.0);
         tempOut2[i] = value;
-        param.pcmOut->append(tempOut2[i]);
+        param.pcmOut->setRawData((char*)tempOut2, sizeof(short)*size);
     }
 
 
-
-
-
+    delete[] buffer;
+    delete[] inputCom;
+    delete[] outputCom;
+    delete[] tempOut;
+    delete[] tempIn2;
 }
