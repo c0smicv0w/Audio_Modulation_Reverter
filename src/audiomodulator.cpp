@@ -51,7 +51,8 @@ void AudioModulator::pitchShift(AudioDataParam param)
     complex *inputCom = new complex[size];
 
 
-    short *tempIn2 = new short[size];                        // pcm convert
+    // pcm convert
+    short *tempIn2 = new short[size];
 
     memcpy(tempIn2, (short*)tempIn, sizeof(short)*size);
 
@@ -63,7 +64,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
     }
 
 
-            // fft
+    // fft
 
     for (int i = 0 ; i < size; i++)
     {
@@ -81,9 +82,28 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     complex *outputCom = new complex[size];               // pitch scaling
 
-    for (int i = 0; i < size / pow(SEMITONE, pitch); i++)
+    double shiftTerm = pow(SEMITONE, pitch);
+
+    if (shiftTerm > 1.0) // up-scaling
     {
-        outputCom[(int)((double)i * (pow(SEMITONE, pitch)))] = inputCom[i];
+        for (int i = 0; i < size / shiftTerm; i++)
+        {
+            outputCom[(int)((double)i * shiftTerm)] = inputCom[i];
+        }
+    }
+    else if (shiftTerm < 1.0) // down-scaling
+    {
+        for (int i = 0; i < size; i++)
+        {
+            outputCom[(int)((double)i * shiftTerm)] = inputCom[i];
+        }
+    }
+    else
+    {
+        for (int i = 0; i < size; i++) //do nothing
+        {
+            outputCom[i] = inputCom[i];
+        }
     }
 
     for (int i = 0; i < size; i++)
@@ -102,11 +122,10 @@ void AudioModulator::pitchShift(AudioDataParam param)
     short *tempOut2 = (short *)tempOut;
     for (int i = 0; i < size; i ++)
     {
-        short value = (short)saturate(buffer[i] * 32768.0, -32768.0, 32767.0);
+        short value = (short)saturate(outputCom[i].re() * 32768.0, -32768.0, 32767.0);
         tempOut2[i] = value;
-        param.pcmOut->setRawData((char*)tempOut2, sizeof(short)*size);
     }
-
+    param.pcmOut->setRawData((char*)tempOut2, sizeof(short)*size);
 
     delete[] buffer;
     delete[] inputCom;
