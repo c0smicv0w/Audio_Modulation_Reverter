@@ -54,6 +54,7 @@ private slots:
 
 signals:
     void dataAvail(AudioDataParam param);
+    void stopDraw();
 };
 
 #endif // AUDIOMGR_H

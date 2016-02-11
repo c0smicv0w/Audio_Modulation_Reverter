@@ -79,7 +79,7 @@ void AudioMgr::processing()
     //Read sound samples from input device to buffer
     qint64 l = m_input->read(m_buffer.data(), len);
 
-    // Return if suspend is triggered
+    // Return if suspendis triggered
     if(state == Suspended)
         return;
 
@@ -144,6 +144,9 @@ void AudioMgr::resume()
 void AudioMgr::stop()
 {
     state = Closed;
-    disconnect(m_input, SIGNAL(readyRead()));
+    // disconnect signal and slot if stop is triggered
+    disconnect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
+
+
 }
 
