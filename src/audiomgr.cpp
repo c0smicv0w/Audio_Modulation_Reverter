@@ -1,7 +1,7 @@
 #include "audiomgr.h"
 
 const int BufferSize = 4096;
-const int ProcessSize = 1024;
+const int ProcessSize = 2048;
 
 AudioMgr::AudioMgr():
     m_Inputdevice(QAudioDeviceInfo::defaultInputDevice()),
