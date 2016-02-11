@@ -1,33 +1,35 @@
 #ifndef AUDIOMGR_H
 #define AUDIOMGR_H
 
+#include <QByteArray>
+#include <QAudioInput>
+#include <QAudioOutput>
 #include <QObject>
 
-#include <QByteArray>
-#include <QBuffer>
-#include <qaudioinput.h>
-#include <qaudiooutput.h>
-
-#include <QDebug>
 #include "audiomodulator.h"
-
 
 class AudioMgr : public QObject
 {
     Q_OBJECT
+
+private:
+    static const int BufferSize = 4096;
+    static const int ProcessSize = 2048;
+
 public:
     AudioMgr();
-    ~AudioMgr();
+    ~AudioMgr() override;
 
     typedef enum
     {
         Closed, Active, Suspended
-    }State;
+    } State;
+
     State state = Closed;
 
     AudioModulator am;
 
-//private:
+public:
     void initializeAudio();
     void createAudioInput();
     void createAudioOutput();
@@ -36,7 +38,7 @@ public:
     void resume();
     void stop();
 
-//private:
+private:
     QAudioDeviceInfo m_Inputdevice;
     QAudioDeviceInfo m_Outputdevice;
     QAudioFormat m_format;
@@ -53,6 +55,5 @@ private slots:
 signals:
     void dataAvail(AudioDataParam param);
 };
-
 
 #endif // AUDIOMGR_H

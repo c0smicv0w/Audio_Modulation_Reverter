@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+#include <QDebug>
 #include "audiomgr.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -12,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&mgr, SIGNAL(dataAvail(AudioDataParam)), SLOT(draw(AudioDataParam)));
 }
-
 
 MainWindow::~MainWindow()
 {
@@ -51,8 +52,6 @@ void MainWindow::on_actionStop_triggered()
     setControl();
 }
 
-
-
 void MainWindow::on_actionResume_triggered()
 {
     qDebug() <<"Resume triggered";
@@ -71,5 +70,4 @@ void MainWindow::draw(AudioDataParam param)
     ui->freqWidget->add(param.freqIn, QPen(Qt::white));
     ui->freqWidget->add(param.freqOut, QPen(Qt::red));
     ui->freqWidget->repaint();
-
 }

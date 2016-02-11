@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "audiomgr.h"
 
-
 namespace Ui {
 class MainWindow;
 }

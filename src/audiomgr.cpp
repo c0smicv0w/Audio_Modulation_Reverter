@@ -1,7 +1,5 @@
 #include "audiomgr.h"
-
-const int BufferSize = 4096;
-const int ProcessSize = 2048;
+#include <QDebug>
 
 AudioMgr::AudioMgr():
     m_Inputdevice(QAudioDeviceInfo::defaultInputDevice()),
@@ -11,12 +9,11 @@ AudioMgr::AudioMgr():
     m_input(0),
     m_buffer(BufferSize, 0)
 {
-    am.setPitch(4);
+    am.setPitch(4); // gilgil temp 2016.02.11
 }
 
 AudioMgr::~AudioMgr()
 {
-
 }
 
 //Initialize audio format
@@ -64,12 +61,10 @@ void AudioMgr::createAudioInput()
         m_input = 0;
     }
     m_audioInput = new QAudioInput(m_Inputdevice, m_format, this);
-
 }
 
 void AudioMgr::processing()
 {
-
     //Return if audio input is null
     if(!m_audioInput)
         return;
@@ -88,9 +83,9 @@ void AudioMgr::processing()
     if(state == Suspended)
         return;
 
-
     if (l <= 0)
         return;
+
     m_totalBuffer.append(m_buffer.constData(), l);
 
     while(true)
@@ -121,39 +116,12 @@ void AudioMgr::processing()
 
         emit dataAvail(param);
 
-        // qDebug() << "write =" << m_output->write(*param.pcmOut);
-
-
-
+        m_output->write(*param.pcmOut);
     }
-
-
-/*
-    if(l > 0)
-    {
-
-
-        //Assign sound samples to short array
-        short* pcmData = (short*)m_buffer.data();
-
-
-        //write sound sample to outputdevice for playback audio
-        static bool first = true;
-        if(first){
-            first = false;
-            for(int i = 0; i < 10; i++)
-               qDebug() << "write =" << m_output->write((char*)pcmData, len);
-        }
-        qDebug() << "write =" << m_output->write((char*)pcmData, len);
-
-    }
-    */
 }
-
 
 void AudioMgr::start()
 {
-
     state = Active;
     //Audio output device
     m_output= m_audioOutput->start();
@@ -162,7 +130,6 @@ void AudioMgr::start()
     //connect readyRead signal to processing slot.
     //Call processing when audio samples fill in inputbuffer
     connect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
-
 }
 
 void AudioMgr::suspend()
