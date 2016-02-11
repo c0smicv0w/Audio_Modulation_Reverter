@@ -121,7 +121,7 @@ void AudioMgr::processing()
 
         emit dataAvail(param);
 
-        qDebug() << "write =" << m_output->write(*param.pcmOut);
+        // qDebug() << "write =" << m_output->write(*param.pcmOut);
 
 
 
