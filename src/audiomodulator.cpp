@@ -26,7 +26,7 @@ void AudioModulator::setAudioFormat(const QAudioFormat &value)
 }
 
 // Convert from double to integer and saturate
-inline int saturate(double dvalue, double minval, double maxval)
+inline int ceil(double dvalue, double minval, double maxval)
 {
     if (dvalue > maxval)
     {
@@ -119,13 +119,13 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     short *tempOut = new short[size];
 
-    short *tempOut2 = (short *)tempOut;
+
     for (int i = 0; i < size; i ++)
     {
-        short value = (short)saturate(outputCom[i].re() * 32768.0, -32768.0, 32767.0);
-        tempOut2[i] = value;
+        short value = (short)ceil(outputCom[i].re() * 32768.0, -32768.0, 32767.0);
+        tempOut[i] = value;
     }
-    param.pcmOut->setRawData((char*)tempOut2, sizeof(short)*size);
+    param.pcmOut->append((char*)tempOut, sizeof(short)*size);
 
     delete[] buffer;
     delete[] inputCom;
