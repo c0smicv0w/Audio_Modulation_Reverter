@@ -26,7 +26,6 @@ private slots:
     void on_actionRecord_triggered();
     void on_actionSuspend_triggered();
     void on_actionStop_triggered();
-
     void on_actionResume_triggered();
 
 private:

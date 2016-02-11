@@ -120,6 +120,11 @@ void AudioMgr::processing()
     }
 }
 
+void AudioMgr::setPitch(int pitch)
+{
+    am.setPitch(pitch);
+}
+
 void AudioMgr::start()
 {
     state = Active;
