@@ -1,5 +1,6 @@
 #include "audiomgr.h"
 #include <QDebug>
+#include <QDate>
 
 AudioMgr::AudioMgr():
     m_Inputdevice(QAudioDeviceInfo::defaultInputDevice()),
@@ -8,11 +9,9 @@ AudioMgr::AudioMgr():
     m_audioOutput(0),
     m_input(0),
     m_buffer(BufferSize, 0),
-    wavIn(0),
-    wavOut(0)
+    pcmInFile(0),
+    pcmOutFile(0)
 {
-    am.setPitch(4); // gilgil temp 2016.02.11
-
 }
 
 AudioMgr::~AudioMgr()
@@ -122,8 +121,8 @@ void AudioMgr::processing()
         emit dataAvail(param);
 
         m_output->write(*param.pcmOut);
-        wavIn->write((short*)pcmIn.constData(), ProcessSize/2);
-        wavOut->write((short*)(*param.pcmOut).constData(), ProcessSize/2);
+        pcmInFile->write((short*)pcmIn.constData(), ProcessSize/sizeof(short));
+        pcmOutFile->write((short*)(*param.pcmOut).constData(), ProcessSize/sizeof(short));
     }
 }
 
@@ -136,9 +135,14 @@ void AudioMgr::start()
     //Audio input device
     m_input = m_audioInput->start();
 
+    // get current date time
+
+    QDateTime current = QDateTime::currentDateTime();
+    QString pcmInName = current.toString() + "_In.wav";
+    QString pcmOutName = current.toString() + "_Out.wav";
     // Create Wav files
-    wavIn = new WavOutFile("In.wav", 44100, 16, 1);
-    wavOut = new WavOutFile("Out.wav", 44100, 16, 1);
+    pcmInFile = new WavOutFile(pcmInName.toStdString().c_str(), 44100, 16, 1);
+    pcmOutFile = new WavOutFile(pcmOutName.toStdString().c_str(), 44100, 16, 1);
 
     //connect readyRead signal to processing slot.
     //Call processing when audio samples fill in inputbuffer
@@ -158,12 +162,13 @@ void AudioMgr::stop()
 {
     state = Closed;
     disconnect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
-    m_audioOutput->~QAudioOutput();
-    m_audioInput->~QAudioInput();
+
+    delete m_audioInput;
+    delete m_audioOutput;
     m_input = 0;
     m_output = 0;
-    wavIn->~WavOutFile();
-    wavOut->~WavOutFile();
+    pcmInFile->~WavOutFile();
+    pcmOutFile->~WavOutFile();
 
 }
 

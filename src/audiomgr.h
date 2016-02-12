@@ -29,8 +29,8 @@ public:
 
     AudioModulator am;
 
-    WavOutFile *wavIn;
-    WavOutFile *wavOut;
+    WavOutFile *pcmInFile;
+    WavOutFile *pcmOutFile;
 
 public:
     void initializeAudio();
