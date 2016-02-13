@@ -164,12 +164,11 @@ void AudioMgr::stop()
     state = Closed;
     disconnect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
 
-    delete m_audioInput;
-    delete m_audioOutput;
+    delete m_audioInput; m_audioInput = 0;
+    delete m_audioOutput; m_audioOutput = 0;
     m_input = 0;
     m_output = 0;
-    pcmInFile->~WavOutFile();
-    pcmOutFile->~WavOutFile();
-
+    delete pcmInFile; pcmInFile = 0;
+    delete pcmOutFile; pcmOutFile = 0;
 }
 
