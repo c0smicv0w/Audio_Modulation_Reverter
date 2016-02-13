@@ -30,7 +30,7 @@ void FreqWidget::paintEvent(QPaintEvent *event)
   {
     const Item& item = items.at(i);
     painter.setPen(item.pen_);
-    int size = item.freq_.size() / sizeof(short);
+    int size = item.freq_.size();
     int h = height();
     QPoint from(0, h / 2);
     for (int i = 0; i < size; i++)

@@ -35,8 +35,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     char* tempIn = (char*)param.pcmIn->data();
     int numElems = param.pcmIn->size();
-    int bytesPerSample = 2; // just considered about 16bit sampling data.
-    int size = numElems/bytesPerSample;
+    int size = numElems;
     double *buffer = new double[size];
     complex *inputCom = new complex[size];
 

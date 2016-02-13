@@ -30,7 +30,7 @@ void PcmWidget::paintEvent(QPaintEvent *event)
   {
     const Item& item = items.at(i);
     painter.setPen(item.pen_);
-    int size = item.pcm_.size() / sizeof(short);
+    int size = item.pcm_.size();
     short* p = (short*)item.pcm_.data();
     int h = height();
     QPoint from(0, h / 2);
