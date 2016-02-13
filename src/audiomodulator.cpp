@@ -119,6 +119,9 @@ void AudioModulator::pitchShift(AudioDataParam param)
         tempOut[i] = value;
     }
 
+    param.pcmOut->clear();
+    param.pcmOut->reserve(numElems);
+
     for (int i = 0; i < numElems; i++)
     {
         param.pcmOut->push_back(tempOut[i]);
