@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QPen>
 #include <QWidget>
+#include <vector>
 #include "complex.h"
 
 class FreqWidget : public QWidget
@@ -11,7 +12,7 @@ class FreqWidget : public QWidget
 
   struct Item
   {
-    QList<complex> freq_;
+    std::vector<complex> freq_;
     QPen pen_;
   };
 
@@ -19,7 +20,7 @@ public:
   explicit FreqWidget(QWidget* parent = 0);
 
   void clear();
-  void add(QList<complex>* freq, QPen pen);
+  void add(std::vector<complex>* freq, QPen pen);
 
 protected:
   QList<Item> items;

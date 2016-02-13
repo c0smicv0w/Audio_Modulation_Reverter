@@ -9,7 +9,7 @@ void PcmWidget::clear()
   items.clear();
 }
 
-void PcmWidget::add(QByteArray* pcm, QPen pen)
+void PcmWidget::add(std::vector<short>* pcm, QPen pen)
 {
   Item item;
   item.pcm_ = *pcm;

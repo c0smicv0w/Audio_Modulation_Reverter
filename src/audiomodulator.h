@@ -1,22 +1,19 @@
 #ifndef AUDIOMODULATOR
 #define AUDIOMODULATOR
 
-#include <QAudioFormat>
-#include <QByteArray>
-#include <QList>
+#include <vector>
 #include "complex.h"
 
 typedef struct {
-    QByteArray *pcmIn;
-    QList<complex> *freqIn;
-    QByteArray *pcmOut;
-    QList<complex> *freqOut;
+    std::vector<short> *pcmIn;
+    std::vector<complex> *freqIn;
+    std::vector<short> *pcmOut;
+    std::vector<complex> *freqOut;
 }AudioDataParam;
 
 class AudioModulator
 {
 private:
-    QAudioFormat audioFormat;
     double pitch;
 
 public:
@@ -24,9 +21,6 @@ public:
 
     double getPitch() const;
     void setPitch(double value);
-
-    QAudioFormat getAudioFormat() const;
-    void setAudioFormat(const QAudioFormat &value);
 };
 
 #endif // AUDIOMODULATOR
