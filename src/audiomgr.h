@@ -29,10 +29,10 @@ public:
 
     AudioModulator am;
 
-public:
+private:
     void initializeAudio();
-    void createAudioInput();
-    void createAudioOutput();
+
+public:
     void start();
     void suspend();
     void resume();

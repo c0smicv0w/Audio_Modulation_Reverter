@@ -35,11 +35,9 @@ void MainWindow::setControl()
 
 void MainWindow::on_actionRecord_triggered()
 {
-    mgr.initializeAudio();
-    mgr.start();
     qDebug()<< "Record triggered";
+    mgr.start();
     setControl();
-
 }
 
 void MainWindow::on_actionSuspend_triggered()

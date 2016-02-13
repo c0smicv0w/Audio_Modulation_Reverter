@@ -13,10 +13,20 @@ AudioMgr::AudioMgr():
     pcmInFile(0),
     pcmOutFile(0)
 {
+    initializeAudio();
 }
 
 AudioMgr::~AudioMgr()
 {
+  if (m_audioOutput != 0) {
+    delete m_audioOutput;
+    m_audioOutput = 0;
+  }
+
+  if (m_audioInput != 0) {
+    delete m_audioInput;
+    m_audioInput = 0;
+  }
 }
 
 //Initialize audio format
@@ -35,7 +45,6 @@ void AudioMgr::initializeAudio()
         //Default format not supported - trying to use nearest
         m_format = infoIn.nearestFormat(m_format);
     }
-
     qDebug() << infoIn.deviceName();
 
     QAudioDeviceInfo infoOut(QAudioDeviceInfo::defaultOutputDevice());
@@ -44,28 +53,10 @@ void AudioMgr::initializeAudio()
        //Default format not supported - trying to use nearest
         m_format = infoOut.nearestFormat(m_format);
     }
-
-
     qDebug() << infoOut.deviceName();
 
-
-    createAudioInput();
-    createAudioOutput();
-}
-
-void AudioMgr::createAudioOutput()
-{
     m_audioOutput = new QAudioOutput(m_Outputdevice, m_format, this);
-}
-
-void AudioMgr::createAudioInput()
-{
-    if (m_input != 0) {
-        disconnect(m_input, 0, this, 0);
-        m_input = 0;
-    }
     m_audioInput = new QAudioInput(m_Inputdevice, m_format, this);
-
 }
 
 void AudioMgr::processing()
@@ -98,19 +89,15 @@ void AudioMgr::processing()
         qint64 size = m_totalBuffer.size();
         if(  size < ProcessSize )
             break;
+        size_t numElems = (size_t)size / sizeof(short);
 
         const short* begin = reinterpret_cast<short*>(m_totalBuffer.data());
-        const short* end = begin + ProcessSize / sizeof(short);
+        const short* end = begin + numElems;
 
         std::vector<short> pcmIn(begin, end);
         std::vector<complex> freqIn;
         std::vector<short> pcmOut;
         std::vector<complex> freqOut;
-
-        //pcmIn.clear(); // gilgil temp 2016.02.16
-        //freqIn.clear(); // gilgil temp 2016.02.16
-        //pcmOut.clear(); // gilgil temp 2016.02.16
-        //freqOut.clear(); // gilgil temp 2016.02.16
 
         m_totalBuffer = m_totalBuffer.mid(ProcessSize);
 
@@ -123,9 +110,11 @@ void AudioMgr::processing()
 
         emit dataAvail(param);
 
+        Q_ASSERT(pcmIn.size() == numElems);
+        Q_ASSERT(pcmOut.size() == numElems);
+        pcmInFile->write(pcmIn.data(), numElems);
+        pcmOutFile->write(pcmOut.data(), numElems);
         m_output->write((const char*)pcmOut.data(), (qint64)ProcessSize);
-        pcmInFile->write(pcmIn.data(), ProcessSize/sizeof(short));
-        pcmOutFile->write(pcmOut.data(), ProcessSize/sizeof(short));
     }
 }
 
@@ -138,11 +127,6 @@ void AudioMgr::start()
 {
     state = Active;
 
-    //Audio output device
-    m_output= m_audioOutput->start();
-    //Audio input device
-    m_input = m_audioInput->start();
-
     // get current date time
     QString current = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-zzz");
     QString pcmInName = current + "_in.wav";
@@ -152,8 +136,16 @@ void AudioMgr::start()
     pcmInFile = new WavOutFile(pcmInName.toStdString().c_str(), 44100, 16, 1);
     pcmOutFile = new WavOutFile(pcmOutName.toStdString().c_str(), 44100, 16, 1);
 
-    //connect readyRead signal to processing slot.
-    //Call processing when audio samples fill in inputbuffer
+    // Audio output device
+    m_output= m_audioOutput->start();
+    Q_ASSERT(m_output != 0);
+
+    // Audio input device
+    m_input = m_audioInput->start();
+    Q_ASSERT(m_input != 0);
+
+    // Connect readyRead signal to processing slot.
+    // Call processing when audio samples fill in inputbuffer
     connect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
 }
 
@@ -161,6 +153,7 @@ void AudioMgr::suspend()
 {
     state = Suspended;
 }
+
 void AudioMgr::resume()
 {
     state = Active;
@@ -171,10 +164,12 @@ void AudioMgr::stop()
     state = Closed;
     disconnect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
 
-    delete m_audioInput; m_audioInput = 0;
-    delete m_audioOutput; m_audioOutput = 0;
+    m_audioInput->stop();
+    m_audioOutput->stop();
+
     m_input = 0;
     m_output = 0;
+
     delete pcmInFile; pcmInFile = 0;
     delete pcmOutFile; pcmOutFile = 0;
 }
