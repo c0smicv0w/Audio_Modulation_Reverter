@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPen>
 #include <QWidget>
+#include <vector>
 
 class PcmWidget : public QWidget
 {
@@ -11,7 +12,7 @@ class PcmWidget : public QWidget
 
   struct Item
   {
-    QByteArray pcm_;
+    std::vector<short> pcm_;
     QPen pen_;
   };
 
@@ -21,7 +22,7 @@ public:
   QAudioFormat audioFormat;
 
   void clear();
-  void add(QByteArray* pcm, QPen pen);
+  void add( std::vector<short>* pcm, QPen pen);
 
 protected:
   QList<Item> items;

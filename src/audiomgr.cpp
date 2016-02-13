@@ -99,17 +99,25 @@ void AudioMgr::processing()
         if(  size < ProcessSize )
             break;
 
-        QByteArray pcmIn;
-        QList<complex> freqIn;
-        QByteArray pcmOut;
-        QList<complex> freqOut;
+        std::vector<short> pcmIn;
+        std::vector<complex> freqIn;
+        std::vector<short> pcmOut;
+        std::vector<complex> freqOut;
 
         pcmIn.clear();
         freqIn.clear();
         pcmOut.clear();
         freqOut.clear();
 
-        pcmIn = m_totalBuffer.left(ProcessSize);
+        QByteArray temp;
+        temp = m_totalBuffer.left(ProcessSize);
+
+        const short* begin = reinterpret_cast<short*>(temp.data());
+        const short* end = begin + temp.length();
+        std::vector<short> tempPcmIn(begin, end);
+
+        pcmIn = tempPcmIn;
+
         m_totalBuffer = m_totalBuffer.mid(ProcessSize);
 
         AudioDataParam param;
@@ -121,9 +129,16 @@ void AudioMgr::processing()
 
         emit dataAvail(param);
 
-        m_output->write(*param.pcmOut);
-        pcmInFile->write((short*)pcmIn.constData(), ProcessSize/sizeof(short));
-        pcmOutFile->write((short*)(*param.pcmOut).constData(), ProcessSize/sizeof(short));
+
+
+
+        QByteArray outPcm;
+        outPcm.fromRawData(reinterpret_cast<char*>(param.pcmOut->data()), sizeof(short)*param.pcmOut->size());
+
+        m_output->write(outPcm);
+        pcmInFile->write((short*)pcmIn.data(), ProcessSize/sizeof(short));
+        pcmOutFile->write((short*)(*param.pcmOut->data()), ProcessSize/sizeof(short));
+
     }
 }
 

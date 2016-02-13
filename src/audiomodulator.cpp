@@ -15,16 +15,6 @@ void AudioModulator::setPitch(double value)
     pitch = value;
 }
 
-QAudioFormat AudioModulator::getAudioFormat() const
-{
-    return audioFormat;
-}
-
-void AudioModulator::setAudioFormat(const QAudioFormat &value)
-{
-    audioFormat = value;
-}
-
 // Convert from double to integer and saturate
 inline int ceil(double dvalue, double minval, double maxval)
 {
@@ -43,12 +33,13 @@ void AudioModulator::pitchShift(AudioDataParam param)
 {
     Transform trans;
 
-    char* tempIn = param.pcmIn->data();
+    char* tempIn = (char*)param.pcmIn->data();
     int numElems = param.pcmIn->size();
-    int bytesPerSample = 2;//audioFormat.sampleSize() / 8;
+    int bytesPerSample = 2; // just considered about 16bit sampling data.
     int size = numElems/bytesPerSample;
     double *buffer = new double[size];
     complex *inputCom = new complex[size];
+
 
 
     // pcm convert
@@ -73,9 +64,12 @@ void AudioModulator::pitchShift(AudioDataParam param)
 
     trans.Forward(inputCom, size);
 
+    param.freqIn->clear();
+    param.freqIn->reserve(size);
+
     for (int i = 0; i < size; i++)
     {
-        param.freqIn->append(inputCom[i]);
+        param.freqIn->push_back(inputCom[i]);
     }
 
 
@@ -106,12 +100,15 @@ void AudioModulator::pitchShift(AudioDataParam param)
         }
     }
 
+
+
+    param.freqOut->clear();
+    param.freqOut->reserve(size);
+
     for (int i = 0; i < size; i++)
     {
-        param.freqOut->append(outputCom[i]);
+        param.freqOut->push_back(outputCom[i]);
     }
-
-
 
 
 
@@ -125,7 +122,14 @@ void AudioModulator::pitchShift(AudioDataParam param)
         short value = (short)ceil(outputCom[i].re() * 32768.0, -32768.0, 32767.0);
         tempOut[i] = value;
     }
-    param.pcmOut->append((char*)tempOut, sizeof(short)*size);
+
+    param.pcmOut->clear();
+    param.pcmOut->reserve(numElems);
+
+    for (int i = 0; i < numElems; i++)
+    {
+        param.pcmOut->push_back(tempOut[i]);
+    }
 
     delete[] buffer;
     delete[] inputCom;

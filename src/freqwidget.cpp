@@ -9,7 +9,7 @@ void FreqWidget::clear()
   items.clear();
 }
 
-void FreqWidget::add(QList<complex>* freq, QPen pen)
+void FreqWidget::add(std::vector<complex>* freq, QPen pen)
 {
   Item item;
   item.freq_ = *freq;
