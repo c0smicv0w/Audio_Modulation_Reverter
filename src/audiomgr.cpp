@@ -89,7 +89,7 @@ void AudioMgr::processing()
         qint64 size = m_totalBuffer.size();
         if(  size < ProcessSize )
             break;
-        size_t numElems = (size_t)size / sizeof(short);
+        size_t numElems = ProcessSize / sizeof(short);
 
         const short* begin = reinterpret_cast<short*>(m_totalBuffer.data());
         const short* end = begin + numElems;
