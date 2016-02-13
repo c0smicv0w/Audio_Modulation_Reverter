@@ -53,6 +53,10 @@ void MainWindow::on_actionStop_triggered()
 {
     qDebug() <<"Stop triggered";
     mgr.stop();
+    ui->pcmWidget->clear();
+    ui->pcmWidget->repaint();
+    ui->freqWidget->clear();
+    ui->freqWidget->repaint();
     setControl();
 }
 

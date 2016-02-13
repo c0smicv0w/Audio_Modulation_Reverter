@@ -1,5 +1,6 @@
 #include "audiomgr.h"
 #include <QDebug>
+#include <QDate>
 
 AudioMgr::AudioMgr():
     m_Inputdevice(QAudioDeviceInfo::defaultInputDevice()),
@@ -7,9 +8,11 @@ AudioMgr::AudioMgr():
     m_audioInput(0),
     m_audioOutput(0),
     m_input(0),
-    m_buffer(BufferSize, 0)
+    m_buffer(BufferSize, 0),
+    pcmInFile(0),
+    pcmOutFile(0)
 {
-    am.setPitch(4); // gilgil temp 2016.02.11
+    am.setPitch(12);
 }
 
 AudioMgr::~AudioMgr()
@@ -45,6 +48,7 @@ void AudioMgr::initializeAudio()
 
     qDebug() << infoOut.deviceName();
 
+
     createAudioInput();
     createAudioOutput();
 }
@@ -61,6 +65,7 @@ void AudioMgr::createAudioInput()
         m_input = 0;
     }
     m_audioInput = new QAudioInput(m_Inputdevice, m_format, this);
+
 }
 
 void AudioMgr::processing()
@@ -117,6 +122,8 @@ void AudioMgr::processing()
         emit dataAvail(param);
 
         m_output->write(*param.pcmOut);
+        pcmInFile->write((short*)pcmIn.constData(), ProcessSize/sizeof(short));
+        pcmOutFile->write((short*)(*param.pcmOut).constData(), ProcessSize/sizeof(short));
     }
 }
 
@@ -128,10 +135,21 @@ void AudioMgr::setPitch(int pitch)
 void AudioMgr::start()
 {
     state = Active;
+
     //Audio output device
     m_output= m_audioOutput->start();
-     //Audio input device
+    //Audio input device
     m_input = m_audioInput->start();
+
+    // get current date time
+    QDateTime current = QDateTime::currentDateTime();
+    QString pcmInName = current.toString() + "_In.wav";
+    QString pcmOutName = current.toString() + "_Out.wav";
+
+    // Create Wav files
+    pcmInFile = new WavOutFile(pcmInName.toStdString().c_str(), 44100, 16, 1);
+    pcmOutFile = new WavOutFile(pcmOutName.toStdString().c_str(), 44100, 16, 1);
+
     //connect readyRead signal to processing slot.
     //Call processing when audio samples fill in inputbuffer
     connect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
@@ -149,6 +167,13 @@ void AudioMgr::resume()
 void AudioMgr::stop()
 {
     state = Closed;
-    disconnect(m_input, SIGNAL(readyRead()));
+    disconnect(m_input, SIGNAL(readyRead()), this, SLOT(processing()));
+
+    delete m_audioInput; m_audioInput = 0;
+    delete m_audioOutput; m_audioOutput = 0;
+    m_input = 0;
+    m_output = 0;
+    delete pcmInFile; pcmInFile = 0;
+    delete pcmOutFile; pcmOutFile = 0;
 }
 

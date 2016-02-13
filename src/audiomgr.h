@@ -7,6 +7,7 @@
 #include <QObject>
 
 #include "audiomodulator.h"
+#include "wavefile.h"
 
 class AudioMgr : public QObject
 {
@@ -24,10 +25,12 @@ public:
     {
         Closed, Active, Suspended
     } State;
-
     State state = Closed;
 
     AudioModulator am;
+
+    WavOutFile *pcmInFile;
+    WavOutFile *pcmOutFile;
 
 public:
     void initializeAudio();
