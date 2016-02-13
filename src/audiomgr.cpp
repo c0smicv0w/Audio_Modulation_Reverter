@@ -137,7 +137,7 @@ void AudioMgr::processing()
 
         m_output->write(outPcm);
         pcmInFile->write((short*)pcmIn.data(), ProcessSize/sizeof(short));
-        pcmOutFile->write((short*)(*param.pcmOut->data()), ProcessSize/sizeof(short));
+        pcmOutFile->write((short*)param.pcmOut->data(), ProcessSize/sizeof(short));
 
     }
 }
