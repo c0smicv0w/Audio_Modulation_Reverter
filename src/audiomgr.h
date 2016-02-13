@@ -51,6 +51,7 @@ private:
 
 private slots:
     void processing();
+    void setPitch(int);
 
 signals:
     void dataAvail(AudioDataParam param);

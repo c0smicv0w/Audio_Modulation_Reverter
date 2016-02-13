@@ -10,9 +10,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->menuBar->setNativeMenuBar(false);
+    ui->pitchValueSlider->setRange(-12, 12);
+    ui->pitchValueSlider->setValue(mgr.am.getPitch());
+
     setControl();
 
     connect(&mgr, SIGNAL(dataAvail(AudioDataParam)), SLOT(draw(AudioDataParam)));
+    connect(ui->pitchValueSlider, SIGNAL(valueChanged(int)), &mgr, SLOT(setPitch(int)));
 }
 
 MainWindow::~MainWindow()
