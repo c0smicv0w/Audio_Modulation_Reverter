@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->menuBar->setNativeMenuBar(false);
-    ui->pitchValueSlider->setRange(-6,6);
+    ui->pitchValueSlider->setRange(-12, 12);
     ui->pitchValueSlider->setValue(mgr.am.getPitch());
 
     setControl();
