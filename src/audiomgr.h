@@ -29,9 +29,6 @@ public:
 
     AudioModulator am;
 
-    WavOutFile *pcmInFile;
-    WavOutFile *pcmOutFile;
-
 public:
     void initializeAudio();
     void createAudioInput();
@@ -51,6 +48,8 @@ private:
     QIODevice *m_output;
     QByteArray m_buffer;
     QByteArray m_totalBuffer;
+    WavOutFile *pcmInFile;
+    WavOutFile *pcmOutFile;
 
 private slots:
     void processing();

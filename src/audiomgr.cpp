@@ -8,11 +8,11 @@ AudioMgr::AudioMgr():
     m_audioInput(0),
     m_audioOutput(0),
     m_input(0),
+    m_output(0),
     m_buffer(BufferSize, 0),
     pcmInFile(0),
     pcmOutFile(0)
 {
-    am.setPitch(12);
 }
 
 AudioMgr::~AudioMgr()
