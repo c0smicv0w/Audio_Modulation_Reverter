@@ -144,9 +144,9 @@ void AudioMgr::start()
     m_input = m_audioInput->start();
 
     // get current date time
-    QDateTime current = QDateTime::currentDateTime();
-    QString pcmInName = current.toString() + "_In.wav";
-    QString pcmOutName = current.toString() + "_Out.wav";
+    QString current = QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss-zzz");
+    QString pcmInName = current + "_in.wav";
+    QString pcmOutName = current + "_out.wav";
 
     // Create Wav files
     pcmInFile = new WavOutFile(pcmInName.toStdString().c_str(), 44100, 16, 1);
