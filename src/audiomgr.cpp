@@ -143,6 +143,7 @@ void AudioMgr::start()
     // Audio input device
     m_input = m_audioInput->start();
     Q_ASSERT(m_input != 0);
+    m_audioInput->setVolume(0.025);
 
     // Connect readyRead signal to processing slot.
     // Call processing when audio samples fill in inputbuffer
