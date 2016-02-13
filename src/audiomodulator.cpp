@@ -40,6 +40,8 @@ void AudioModulator::pitchShift(AudioDataParam param)
     double *buffer = new double[size];
     complex *inputCom = new complex[size];
 
+    param.freqIn->clear();
+    param.freqIn->reserve(size);
 
     // pcm convert
     short *tempIn2 = new short[size];
@@ -68,7 +70,8 @@ void AudioModulator::pitchShift(AudioDataParam param)
         param.freqIn->push_back(inputCom[i]);
     }
 
-
+    param.freqOut->clear();
+    param.freqOut->reserve(size);
 
     complex *outputCom = new complex[size];               // pitch scaling
 
