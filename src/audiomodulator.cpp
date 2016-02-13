@@ -16,7 +16,7 @@ void AudioModulator::setPitch(double value)
 }
 
 // Convert from double to integer and saturate
-inline int ceil(double dvalue, double minval, double maxval)
+inline double ceil(double dvalue, double minval, double maxval)
 {
     if (dvalue > maxval)
     {
@@ -26,57 +26,34 @@ inline int ceil(double dvalue, double minval, double maxval)
     {
         dvalue = minval;
     }
-    return (int)dvalue;
+    return dvalue;
 }
 
 void AudioModulator::pitchShift(AudioDataParam param)
 {
     Transform trans;
+    int size = param.pcmIn->size();
 
-    char* tempIn = (char*)param.pcmIn->data();
-    int numElems = param.pcmIn->size();
-    int size = numElems;
-    double *buffer = new double[size];
-    complex *inputCom = new complex[size];
-
-
-
+    //
     // pcm convert
-    short *tempIn2 = new short[size];
-
-    memcpy(tempIn2, (short*)tempIn, sizeof(short)*size);
-
-    double conv = 1.0 / 32768.0;
+    //
+    param.freqIn->resize(size);
+    complex *inputCom = param.freqIn->data();
+    static double conv = 1.0 / 32768.0;
     for (int i = 0; i < size; i++)
     {
-        short value = tempIn2[i];
-        buffer[i] = (double)(value * conv);
+        inputCom[i] = (double)((*(param.pcmIn))[i] * conv);
     }
 
-
+    //
     // fft
-
-    for (int i = 0 ; i < size; i++)
-    {
-        inputCom[i] = buffer[i];
-    }
-
+    //
     trans.Forward(inputCom, size);
 
-    param.freqIn->clear();
-    param.freqIn->reserve(size);
-
-    for (int i = 0; i < size; i++)
-    {
-        param.freqIn->push_back(inputCom[i]);
-    }
-
-
-
-    complex *outputCom = new complex[size];               // pitch scaling
-
+    // pitch shift
+    param.freqOut->resize(size);
+    complex *outputCom = param.freqOut->data();
     double shiftTerm = pow(SEMITONE, pitch);
-
     if (shiftTerm > 1.0) // up-scaling
     {
         for (int i = 0; i < size / shiftTerm; i++)
@@ -99,40 +76,19 @@ void AudioModulator::pitchShift(AudioDataParam param)
         }
     }
 
+    //
+    // ifft
+    //
+    trans.Inverse(outputCom, size);
 
-
-    param.freqOut->clear();
-    param.freqOut->reserve(size);
-
+    //
+    // pcm convert
+    //
+    param.pcmOut->resize(size);
     for (int i = 0; i < size; i++)
     {
-        param.freqOut->push_back(outputCom[i]);
+        double d = outputCom[i].re();
+        d = ceil(d * 32768.0, -32768.0, 32767.0);
+        (*param.pcmOut)[i] = (short)d;
     }
-
-
-
-    trans.Inverse(outputCom, size);                     // Ifft
-
-    short *tempOut = new short[size];
-
-
-    for (int i = 0; i < size; i ++)
-    {
-        short value = (short)ceil(outputCom[i].re() * 32768.0, -32768.0, 32767.0);
-        tempOut[i] = value;
-    }
-
-    param.pcmOut->clear();
-    param.pcmOut->reserve(numElems);
-
-    for (int i = 0; i < numElems; i++)
-    {
-        param.pcmOut->push_back(tempOut[i]);
-    }
-
-    delete[] buffer;
-    delete[] inputCom;
-    delete[] outputCom;
-    delete[] tempOut;
-    delete[] tempIn2;
 }
