@@ -50,7 +50,9 @@ void AudioModulator::pitchShift(AudioDataParam param)
     //
     trans.Forward(inputCom, size);
 
+    //
     // pitch shift
+    //
     param.freqOut->resize(size);
     complex *outputCom = param.freqOut->data();
     double shiftTerm = pow(SEMITONE, pitch);
