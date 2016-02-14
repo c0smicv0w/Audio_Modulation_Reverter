@@ -81,7 +81,8 @@ void AudioModulator::pitchShift(AudioDataParam param)
     //
     // ifft
     //
-    trans.Inverse(outputCom, size);
+    std::vector<complex> tempCom = *(param.freqOut);
+    trans.Inverse(tempCom.data(), size);
 
     //
     // pcm convert
@@ -89,7 +90,7 @@ void AudioModulator::pitchShift(AudioDataParam param)
     param.pcmOut->resize(size);
     for (int i = 0; i < size; i++)
     {
-        double d = outputCom[i].re();
+        double d = tempCom[i].re();
         d = ceil(d * 32768.0, -32768.0, 32767.0);
         (*param.pcmOut)[i] = (short)d;
     }
