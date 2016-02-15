@@ -14,8 +14,8 @@ class AudioMgr : public QObject
     Q_OBJECT
 
 private:
-    static const int InputSize = 4096;
-    static const int ProcessSize = 2048;
+    static const int InputSize = 16384;
+    static const int ProcessSize = 16384;
 
 public:
     AudioMgr();
