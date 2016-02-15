@@ -9,7 +9,7 @@ AudioMgr::AudioMgr():
     m_audioOutput(0),
     m_input(0),
     m_output(0),
-    m_buffer(BufferSize, 0),
+    m_buffer(InputSize, 0),
     pcmInFile(0),
     pcmOutFile(0)
 {
@@ -69,8 +69,8 @@ void AudioMgr::processing()
     qint64 len = m_audioInput->bytesReady();
 
     //Limit sample size
-    if(len > BufferSize)
-        len = BufferSize;
+    if(len > InputSize)
+        len = InputSize;
 
     //Read sound samples from input device to buffer
     qint64 l = m_input->read(m_buffer.data(), len);
