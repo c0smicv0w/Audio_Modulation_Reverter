@@ -56,7 +56,9 @@ void AudioMgr::initializeAudio()
     qDebug() << infoOut.deviceName();
 
     m_audioOutput = new QAudioOutput(m_Outputdevice, m_format, this);
+    m_audioOutput->setBufferSize(OutputSize * 2);
     m_audioInput = new QAudioInput(m_Inputdevice, m_format, this);
+    m_audioInput->setBufferSize(InputSize);
 }
 
 void AudioMgr::processing()
@@ -87,9 +89,9 @@ void AudioMgr::processing()
     while(true)
     {
         qint64 size = m_totalBuffer.size();
-        if(  size < ProcessSize )
+        if(  size < OutputSize )
             break;
-        size_t numElems = ProcessSize / sizeof(short);
+        size_t numElems = OutputSize / sizeof(short);
 
         const short* begin = reinterpret_cast<short*>(m_totalBuffer.data());
         const short* end = begin + numElems;
@@ -99,7 +101,7 @@ void AudioMgr::processing()
         std::vector<short> pcmOut;
         std::vector<complex> freqOut;
 
-        m_totalBuffer = m_totalBuffer.mid(ProcessSize);
+        m_totalBuffer = m_totalBuffer.mid(OutputSize);
 
         AudioDataParam param;
         param.pcmIn = &pcmIn;
@@ -114,7 +116,9 @@ void AudioMgr::processing()
         Q_ASSERT(pcmOut.size() == numElems);
         pcmInFile->write(pcmIn.data(), numElems);
         pcmOutFile->write(pcmOut.data(), numElems);
-        m_output->write((const char*)pcmOut.data(), (qint64)ProcessSize);
+        qint64 writeLen = m_output->write((const char*)pcmOut.data(), (qint64)OutputSize);
+        if (writeLen != OutputSize)
+            qWarning() << QString("m_output->write return %1 (should be %2)").arg(writeLen, OutputSize);
     }
 }
 
