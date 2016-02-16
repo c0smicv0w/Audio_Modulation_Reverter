@@ -51,6 +51,15 @@ void AudioModulator::pitchShift(AudioDataParam param)
     trans.Forward(inputCom, size);
 
     //
+    // Apply nyquist theorem
+    //
+    if (pitch < 0)
+    {
+      for (int i = size / 2; i < size; i++)
+      inputCom[i] = 0;
+    }
+
+    //
     // pitch shift
     //
     param.freqOut->resize(size);
