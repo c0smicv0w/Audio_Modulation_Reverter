@@ -32,11 +32,11 @@ void FreqWidget::paintEvent(QPaintEvent *event)
     painter.setPen(item.pen_);
     int size = item.freq_.size();
     int h = height();
-    QPoint from(0, h / 2);
+    QPoint from(0, h);
     for (int i = 0; i < size; i++)
     {
       int amplitude = item.freq_.at(i).norm();
-      int y = h / 2 - amplitude * h  / 2 / 32768;
+      int y = h - amplitude * h / 32768;
       QPoint to(i, y);
       painter.drawLine(from, to);
       from = to;
