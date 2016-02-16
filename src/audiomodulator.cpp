@@ -53,8 +53,11 @@ void AudioModulator::pitchShift(AudioDataParam param)
     //
     // Apply nyquist theorem
     //
-    for (int i = size / 2; i < size; i++)
+    if (pitch < 0)
+    {
+      for (int i = size / 2; i < size; i++)
       inputCom[i] = 0;
+    }
 
     //
     // pitch shift
