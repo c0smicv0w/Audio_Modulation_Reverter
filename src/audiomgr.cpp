@@ -8,7 +8,7 @@ AudioMgr::AudioMgr():
     m_audioInput(0),
     m_audioOutput(0),
     m_input(0),
-    m_output(0),
+    m_output(0),s
     m_buffer(InputSize, 0),
     pcmInFile(0),
     pcmOutFile(0)
@@ -147,7 +147,7 @@ void AudioMgr::start()
     // Audio input device
     m_input = m_audioInput->start();
     Q_ASSERT(m_input != 0);
-    m_audioInput->setVolume(0.025); // gilgil temp 2016.02.14
+    // m_audioInput->setVolume(0.025); // gilgil temp 2016.02.14
 
     // Connect readyRead signal to processing slot.
     // Call processing when audio samples fill in inputbuffer
