@@ -8,7 +8,7 @@ AudioMgr::AudioMgr():
     m_audioInput(0),
     m_audioOutput(0),
     m_input(0),
-    m_output(0),s
+    m_output(0),
     m_buffer(InputSize, 0),
     pcmInFile(0),
     pcmOutFile(0)
