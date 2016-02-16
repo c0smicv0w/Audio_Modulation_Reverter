@@ -118,7 +118,7 @@ void AudioMgr::processing()
         pcmOutFile->write(pcmOut.data(), numElems);
         qint64 writeLen = m_output->write((const char*)pcmOut.data(), (qint64)OutputSize);
         if (writeLen != OutputSize)
-            qWarning() << QString("m_output->write return %1 (should be %2)").arg(writeLen, OutputSize);
+            qWarning() << QString("m_output->write return %1 (should be %2)").arg(writeLen).arg(OutputSize);
     }
 }
 
