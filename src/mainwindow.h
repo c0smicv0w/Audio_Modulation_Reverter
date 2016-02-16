@@ -28,6 +28,8 @@ private slots:
     void on_actionStop_triggered();
     void on_actionResume_triggered();
 
+    void on_pbReset_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

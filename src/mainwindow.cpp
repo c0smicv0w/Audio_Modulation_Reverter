@@ -77,3 +77,8 @@ void MainWindow::draw(AudioDataParam param)
     ui->freqWidget->add(param.freqOut, QPen(Qt::red));
     ui->freqWidget->repaint();
 }
+
+void MainWindow::on_pbReset_clicked()
+{
+    ui->pitchValueSlider->setValue(0);
+}
